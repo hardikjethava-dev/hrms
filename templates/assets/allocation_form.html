@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }} - HRMS Portal{% endblock %}
+{% block page_header %}{{ title }}{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 0 auto;">
+    <div class="card">
+        <h2 style="font-size: 1.5rem; margin-bottom: 1.5rem; font-weight: 600;">Asset Allocation Details</h2>
+        <form method="POST">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label class="form-label" for="alloc_asset">Asset to Allocate</label>
+                {{ form.asset }}
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="alloc_emp">Employee</label>
+                {{ form.employee }}
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="alloc_date">Allocation Date</label>
+                {{ form.allocated_date }}
+            </div>
+
+            <div class="form-group" style="margin-bottom: 2rem;">
+                <label class="form-label" for="return_date">Returned Date</label>
+                {{ form.returned_date }}
+                <small style="color: var(--text-secondary); display: block; margin-top: 0.25rem;">Leave empty if the asset is still active/with employee</small>
+            </div>
+
+            <div style="display: flex; gap: 1rem;">
+                <button type="submit" class="btn btn-primary" id="btn_save_alloc">Save Allocation</button>
+                <a href="{% url 'asset_list' %}" class="btn btn-secondary" id="btn_cancel_alloc">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

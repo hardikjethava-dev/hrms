@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+{% block title %}Leave Management - HRMS Portal{% endblock %}
+{% block page_header %}Leave Management{% endblock %}
+
+{% block content %}
+<div style="display: flex; flex-direction: column; gap: 2rem;">
+    <!-- Apply for Leave Section -->
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <span style="color: var(--text-secondary);">Manage and track vacation time and sick leave</span>
+        {% if not is_manager %}
+            <a href="{% url 'leave_apply' %}" class="btn btn-primary" id="btn_apply_leave">
+                <i class="fa-solid fa-plane-departure"></i> Apply for Leave
+            </a>
+        {% endif %}
+    </div>
+
+    <!-- Balances Grid for Employees -->
+    {% if not is_manager and balances %}
+    <div>
+        <h3 style="font-size: 1.2rem; font-weight: 600; margin-bottom: 1rem;">Available Balances</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1.5rem;">
+            {% for balance in balances %}
+                <div class="card" style="padding: 1.25rem; text-align: center;">
+                    <span style="font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em;">{{ balance.leave_type }}</span>
+                    <div style="font-size: 2.25rem; font-weight: 800; color: var(--primary); margin: 0.5rem 0;">
+                        {{ balance.remaining_days }}
+                    </div>
+                    <span style="font-size: 0.8rem; color: var(--text-secondary);">of {{ balance.allowed_days }} days allowed</span>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Pending Requests Card -->
+    <div class="card">
+        <h3 style="font-size: 1.2rem; font-weight: 600; margin-bottom: 1rem; color: var(--warning);">Pending Leave Requests</h3>
+        
+        <div class="table-container">
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        {% if is_manager %}
+                            <th>Employee</th>
+                        {% endif %}
+                        <th>Leave Type</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Duration</th>
+                        <th>Reason</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for leave in pending_requests %}
+                        <tr>
+                            {% if is_manager %}
+                                <td>
+                                    <strong style="color: var(--text-primary);">{{ leave.employee.first_name }} {{ leave.employee.last_name }}</strong>
+                                    <div style="font-size: 0.75rem; color: var(--text-secondary);">{{ leave.employee.employee_id }}</div>
+                                </td>
+                            {% endif %}
+                            <td>{{ leave.leave_type }}</td>
+                            <td>{{ leave.start_date }}</td>
+                            <td>{{ leave.end_date }}</td>
+                            <td>
+                                <!-- custom date difference in templates requires simple subtraction/duration rendering or computed in model, let's keep it simple -->
+                                <strong>{{ leave.start_date|timesince:leave.end_date|default:"-" }}</strong>
+                            </td>
+                            <td style="font-size: 0.85rem; color: var(--text-secondary);">{{ leave.reason|truncatechars:50 }}</td>
+                            <td>
+                                {% if is_manager %}
+                                    <div style="display: flex; gap: 0.5rem;">
+                                        <a href="{% url 'leave_approve' leave.pk %}" class="btn btn-primary" style="padding: 0.4rem 0.75rem; font-size: 0.8rem;" id="btn_approve_leave_{{ leave.id }}">
+                                            <i class="fa-solid fa-check"></i> Approve
+                                        </a>
+                                        <a href="{% url 'leave_reject' leave.pk %}" class="btn btn-danger" style="padding: 0.4rem 0.75rem; font-size: 0.8rem;" id="btn_reject_leave_{{ leave.id }}">
+                                            <i class="fa-solid fa-xmark"></i> Reject
+                                        </a>
+                                    </div>
+                                {% else %}
+                                    <a href="{% url 'leave_cancel' leave.pk %}" class="btn btn-secondary" style="padding: 0.4rem 0.75rem; font-size: 0.8rem;" id="btn_cancel_leave_{{ leave.id }}">Cancel</a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="{% if is_manager %}7{% else %}6{% endif %}" style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+                                No pending requests.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- History Requests Card -->
+    <div class="card">
+        <h3 style="font-size: 1.2rem; font-weight: 600; margin-bottom: 1rem;">Processed Request History</h3>
+        
+        <div class="table-container">
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        {% if is_manager %}
+                            <th>Employee</th>
+                        {% endif %}
+                        <th>Leave Type</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Status</th>
+                        <th>Processed By</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for leave in history_requests %}
+                        <tr>
+                            {% if is_manager %}
+                                <td>
+                                    <strong style="color: var(--text-primary);">{{ leave.employee.first_name }} {{ leave.employee.last_name }}</strong>
+                                    <div style="font-size: 0.75rem; color: var(--text-secondary);">{{ leave.employee.employee_id }}</div>
+                                </td>
+                            {% endif %}
+                            <td>{{ leave.leave_type }}</td>
+                            <td>{{ leave.start_date }}</td>
+                            <td>{{ leave.end_date }}</td>
+                            <td>
+                                <span class="badge {% if leave.status == 'Approved' %}badge-success{% elif leave.status == 'Rejected' or leave.status == 'Cancelled' %}badge-danger{% else %}badge-secondary{% endif %}">
+                                    {{ leave.status }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if leave.approved_by %}
+                                    <span style="font-size: 0.85rem;">{{ leave.approved_by.first_name }} {{ leave.approved_by.last_name }}</span>
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="{% if is_manager %}6{% else %}5{% endif %}" style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+                                No request history.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

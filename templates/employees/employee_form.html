@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }} - HRMS Portal{% endblock %}
+{% block page_header %}{{ title }}{% endblock %}
+
+{% block content %}
+<div style="max-width: 900px; margin: 0 auto;">
+    <div class="card">
+        <h2 style="font-size: 1.5rem; margin-bottom: 1.5rem; font-weight: 600;">{{ title }}</h2>
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <h3 style="font-size: 1.1rem; color: var(--primary); margin-bottom: 1rem; border-bottom: 1px solid var(--border-glass); padding-bottom: 0.25rem;">Account Credentials</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+                <div class="form-group">
+                    <label class="form-label" for="emp_email">Email Address</label>
+                    {{ form.email }}
+                    {% if form.email.errors %}
+                        <span style="color: var(--danger); font-size: 0.8rem;">{{ form.email.errors.0 }}</span>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="emp_role">System Role</label>
+                    {{ form.role }}
+                    {% if form.role.errors %}
+                        <span style="color: var(--danger); font-size: 0.8rem;">{{ form.role.errors.0 }}</span>
+                    {% endif %}
+                </div>
+                <div class="form-group col-12" style="grid-column: span 2;">
+                    <label class="form-label" for="emp_password">Password</label>
+                    {{ form.password }}
+                    {% if form.password.errors %}
+                        <span style="color: var(--danger); font-size: 0.8rem;">{{ form.password.errors.0 }}</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <h3 style="font-size: 1.1rem; color: var(--primary); margin-bottom: 1rem; border-bottom: 1px solid var(--border-glass); padding-bottom: 0.25rem;">Personal & Job Profile</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+                <div class="form-group">
+                    <label class="form-label" for="emp_id">Employee ID / Code</label>
+                    {{ form.employee_id }}
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="emp_first_name">First Name</label>
+                    {{ form.first_name }}
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="emp_last_name">Last Name</label>
+                    {{ form.last_name }}
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="emp_phone">Phone Number</label>
+                    {{ form.phone }}
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="emp_dob">Date of Birth</label>
+                    {{ form.date_of_birth }}
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="emp_gender">Gender</label>
+                    {{ form.gender }}
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="emp_join_date">Joining Date</label>
+                    {{ form.joining_date }}
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="emp_designation">Designation</label>
+                    {{ form.designation }}
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="emp_type">Employment Type</label>
+                    {{ form.employment_type }}
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="emp_status">Employment Status</label>
+                    {{ form.employment_status }}
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="emp_department">Department</label>
+                    {{ form.department }}
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="emp_manager">Line Manager</label>
+                    {{ form.manager }}
+                </div>
+                <div class="form-group col-12" style="grid-column: span 2;">
+                    <label class="form-label" for="emp_address">Home Address</label>
+                    {{ form.address }}
+                </div>
+                <div class="form-group col-12" style="grid-column: span 2;">
+                    <label class="form-label" for="emp_pic">Profile Picture</label>
+                    {{ form.profile_picture }}
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                <button type="submit" class="btn btn-primary" id="btn_save_employee">Save Employee</button>
+                <a href="{% url 'employee_list' %}" class="btn btn-secondary" id="btn_cancel_employee">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

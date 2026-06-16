@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+{% block title %}Recruitment Dashboard - HRMS Portal{% endblock %}
+{% block page_header %}Recruitment Dashboard{% endblock %}
+
+{% block content %}
+<div style="display: flex; flex-direction: column; gap: 2rem;">
+    <!-- Actions and stats -->
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <span style="color: var(--text-secondary);">Track job listings and active screening processes</span>
+        <div style="display: flex; gap: 0.75rem;">
+            <a href="{% url 'job_create' %}" class="btn btn-primary" id="btn_post_job">
+                <i class="fa-solid fa-folder-plus"></i> Post Job Position
+            </a>
+            <a href="{% url 'candidate_add' %}" class="btn btn-secondary" id="btn_register_candidate">
+                <i class="fa-solid fa-user-plus"></i> Register Candidate
+            </a>
+        </div>
+    </div>
+
+    <!-- Job Openings Card -->
+    <div class="card">
+        <h3 style="font-size: 1.2rem; font-weight: 600; margin-bottom: 1rem;">Job Openings</h3>
+        <div class="table-container">
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th>Job Title</th>
+                        <th>Department</th>
+                        <th>Vacancies</th>
+                        <th>Status</th>
+                        <th>Posted Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for job in jobs %}
+                        <tr>
+                            <td><strong style="color: var(--text-primary);">{{ job.title }}</strong></td>
+                            <td>{{ job.department.name }}</td>
+                            <td>{{ job.vacancies }}</td>
+                            <td>
+                                <span class="badge {% if job.status == 'Open' %}badge-success{% elif job.status == 'Draft' %}badge-secondary{% else %}badge-danger{% endif %}">
+                                    {{ job.status }}
+                                </span>
+                            </td>
+                            <td>{{ job.created_at|date }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="5" style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+                                No job positions registered.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Candidates Application pipeline Card -->
+    <div class="card">
+        <h3 style="font-size: 1.2rem; font-weight: 600; margin-bottom: 1rem;">Candidate Submissions</h3>
+        <div class="table-container">
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th>Candidate Name</th>
+                        <th>Job Role</th>
+                        <th>Experience</th>
+                        <th>Status</th>
+                        <th>Resume</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cand in candidates %}
+                        <tr>
+                            <td>
+                                <strong style="color: var(--text-primary);">{{ cand.first_name }} {{ cand.last_name }}</strong>
+                                <div style="font-size: 0.75rem; color: var(--text-secondary);">{{ cand.email }} | {{ cand.phone }}</div>
+                            </td>
+                            <td>{{ cand.job_position.title|default:"General Submission" }}</td>
+                            <td>{{ cand.experience }} Yrs</td>
+                            <td>
+                                <span class="badge {% if cand.status == 'Hired' or cand.status == 'Selected' %}badge-success{% elif cand.status == 'Rejected' %}badge-danger{% elif cand.status == 'Interview' %}badge-warning{% else %}badge-info{% endif %}">
+                                    {{ cand.status }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if cand.resume %}
+                                    <a href="{{ cand.resume.url }}" target="_blank" style="font-size: 0.85rem;" id="link_resume_{{ cand.id }}">
+                                        <i class="fa-solid fa-file-pdf"></i> View Resume
+                                    </a>
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{% url 'candidate_edit' cand.pk %}" class="btn btn-secondary" style="padding: 0.4rem 0.75rem; font-size: 0.8rem;" id="btn_edit_cand_{{ cand.id }}">
+                                    Update Status
+                                </a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+                                No candidate entries.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

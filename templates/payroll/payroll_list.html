@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+{% block title %}Payroll - HRMS Portal{% endblock %}
+{% block page_header %}Payroll{% endblock %}
+
+{% block content %}
+<div style="display: flex; flex-direction: column; gap: 2rem;">
+    <!-- Action header and generator -->
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+        <span style="color: var(--text-secondary);">Manage employee compensation and payslips</span>
+        
+        {% if is_manager %}
+            <div class="card" style="padding: 1rem; width: 100%; max-width: 500px;">
+                <h4 style="font-size: 0.95rem; margin-bottom: 0.75rem; font-weight: 600;">Bulk Generate Payroll</h4>
+                <form method="POST" action="{% url 'generate_payroll' %}" style="display: flex; gap: 0.5rem; align-items: center;">
+                    {% csrf_token %}
+                    <select name="month" class="form-control" style="flex: 1;" id="gen_month">
+                        <option value="">Month</option>
+                        {% for num, name in months %}
+                            <option value="{{ num }}">{{ name }}</option>
+                        {% endfor %}
+                    </select>
+                    <input type="number" name="year" value="{{ current_year }}" class="form-control" style="width: 100px;" id="gen_year">
+                    <button type="submit" class="btn btn-primary" style="height: 42px;" id="btn_bulk_generate">Generate</button>
+                </form>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Manager view tabbed layout -->
+    {% if is_manager %}
+        <div class="card">
+            <h3 style="font-size: 1.2rem; font-weight: 600; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
+                Salary Structures
+                <a href="{% url 'salary_structure_add' %}" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.85rem;" id="btn_add_structure">
+                    <i class="fa-solid fa-plus"></i> Configure Structure
+                </a>
+            </h3>
+            
+            <div class="table-container">
+                <table class="custom-table">
+                    <thead>
+                        <tr>
+                            <th>Employee</th>
+                            <th>Basic Salary</th>
+                            <th>HRA</th>
+                            <th>Allowances</th>
+                            <th>Deductions</th>
+                            <th>Effective Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for struct in structures %}
+                            <tr>
+                                <td>
+                                    <strong style="color: var(--text-primary);">{{ struct.employee.first_name }} {{ struct.employee.last_name }}</strong>
+                                    <div style="font-size: 0.75rem; color: var(--text-secondary);">{{ struct.employee.employee_id }}</div>
+                                </td>
+                                <td>{{ struct.basic_salary }}</td>
+                                <td>{{ struct.hra }}</td>
+                                <td>{{ struct.allowances }}</td>
+                                <td>{{ struct.deductions }}</td>
+                                <td>{{ struct.effective_date }}</td>
+                                <td>
+                                    <a href="{% url 'salary_structure_edit' struct.pk %}" class="btn btn-secondary" style="padding: 0.4rem 0.75rem; font-size: 0.8rem;" id="btn_edit_structure_{{ struct.id }}">Edit</a>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="7" style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+                                    No salary structures configured.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Generated Payslip Records Card -->
+    <div class="card">
+        <h3 style="font-size: 1.2rem; font-weight: 600; margin-bottom: 1rem;">
+            {% if is_manager %}Generated Payslips{% else %}My Payslips{% endif %}
+        </h3>
+        
+        <div class="table-container">
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        {% if is_manager %}
+                            <th>Employee</th>
+                        {% endif %}
+                        <th>Period</th>
+                        <th>Gross Salary</th>
+                        <th>Deductions</th>
+                        <th>Net Salary</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in records %}
+                        <tr>
+                            {% if is_manager %}
+                                <td>
+                                    <strong style="color: var(--text-primary);">{{ record.employee.first_name }} {{ record.employee.last_name }}</strong>
+                                    <div style="font-size: 0.75rem; color: var(--text-secondary);">{{ record.employee.employee_id }}</div>
+                                </td>
+                            {% endif %}
+                            <td><strong>{{ record.get_month_display }} {{ record.year }}</strong></td>
+                            <td>{{ record.gross_salary }}</td>
+                            <td>{{ record.deduction_amount }}</td>
+                            <td style="color: var(--success); font-weight: bold;">{{ record.net_salary }}</td>
+                            <td>
+                                <!-- PDF export link -->
+                                <a href="{% url 'report_payslip' record.pk %}" class="btn btn-primary" style="padding: 0.4rem 0.75rem; font-size: 0.8rem;" target="_blank" id="btn_download_payslip_{{ record.id }}">
+                                    <i class="fa-solid fa-file-pdf"></i> Download PDF
+                                </a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="{% if is_manager %}6{% else %}5{% endif %}" style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+                                No payslip records found.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+{% block title %}Employee Dashboard - HRMS Portal{% endblock %}
+{% block page_header %}My Workspace{% endblock %}
+
+{% block content %}
+<div style="display: flex; flex-direction: column; gap: 2rem;">
+    <!-- Top Welcome Banner -->
+    <div class="card" style="padding: 2rem; background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(6, 182, 212, 0.15)); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1.5rem;">
+        <div>
+            <h2 style="font-size: 1.75rem; font-weight: 800; margin-bottom: 0.25rem;">Welcome, {{ employee.first_name|default:"Employee" }}!</h2>
+            <p style="color: var(--text-secondary); font-size: 0.95rem;">Track your schedule, balance, payslips, and announcements here.</p>
+        </div>
+        
+        <!-- Attendance Quick Clock-in/out Widget -->
+        <div class="card" style="min-width: 280px; padding: 1.25rem; background: var(--bg-secondary); border-color: rgba(255,255,255,0.05); margin-bottom: 0;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <span style="font-size: 0.85rem; color: var(--text-secondary); text-transform: uppercase;">Attendance Tracker</span>
+                {% if attendance_today %}
+                    <span class="badge {% if attendance_today.check_out %}badge-success{% else %}badge-warning{% endif %}">
+                        {% if attendance_today.check_out %}Clocked Out{% else %}Active{% endif %}
+                    </span>
+                {% else %}
+                    <span class="badge badge-secondary">Not Checked In</span>
+                {% endif %}
+            </div>
+            
+            {% if not attendance_today %}
+                <form method="POST" action="{% url 'clock_in' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary" style="width: 100%; height: 42px;" id="btn_dashboard_checkin">
+                        <i class="fa-solid fa-arrow-right-to-bracket"></i> Clock In Today
+                    </button>
+                </form>
+            {% elif not attendance_today.check_out %}
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; font-size: 0.9rem;">
+                    <span>Checked In:</span>
+                    <strong>{{ attendance_today.check_in|time:"H:i" }}</strong>
+                </div>
+                <form method="POST" action="{% url 'clock_out' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger" style="width: 100%; height: 42px;" id="btn_dashboard_checkout">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i> Clock Out Now
+                    </button>
+                </form>
+            {% else %}
+                <div style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.9rem;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>In / Out:</span>
+                        <strong>{{ attendance_today.check_in|time:"H:i" }} - {{ attendance_today.check_out|time:"H:i" }}</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>Hours Worked:</span>
+                        <strong>{{ attendance_today.working_hours }} Hours</strong>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Dashboards split -->
+    <div class="dashboard-grid">
+        <!-- Leave Balances -->
+        <div class="card col-8">
+            <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 1.25rem; border-bottom: 1px solid var(--border-glass); padding-bottom: 0.5rem;">
+                <i class="fa-solid fa-calendar-check"></i> Leave Balances
+            </h3>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 1rem;">
+                {% for bal in leave_balances %}
+                    <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-glass); padding: 1rem; border-radius: var(--radius-sm); text-align: center;">
+                        <span style="font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase;">{{ bal.leave_type|slice:":10" }}..</span>
+                        <div style="font-size: 1.75rem; font-weight: 700; color: var(--primary); margin: 0.25rem 0;">{{ bal.remaining_days }}</div>
+                        <span style="font-size: 0.7rem; color: var(--text-secondary);">Remaining</span>
+                    </div>
+                {% empty %}
+                    <span style="color: var(--text-secondary); font-style: italic;">No leave balances initialized.</span>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Upcoming Holidays -->
+        <div class="card col-4">
+            <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 1.25rem; border-bottom: 1px solid var(--border-glass); padding-bottom: 0.5rem;">
+                <i class="fa-solid fa-umbrella-beach"></i> Upcoming Holidays
+            </h3>
+            <div style="display: flex; flex-direction: column; gap: 0.75rem; max-height: 220px; overflow-y: auto;">
+                {% for hol in upcoming_holidays %}
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem;">
+                        <div>
+                            <strong style="color: var(--text-primary);">{{ hol.name }}</strong>
+                            {% if hol.is_optional %}
+                                <span class="badge badge-warning" style="font-size: 0.65rem; padding: 1px 4px; margin-left: 0.25rem;">Optional</span>
+                            {% endif %}
+                        </div>
+                        <span style="color: var(--text-secondary); font-size: 0.8rem;">{{ hol.date|date:"M d" }}</span>
+                    </div>
+                {% empty %}
+                    <span style="color: var(--text-secondary); font-style: italic; font-size: 0.9rem;">No upcoming holidays.</span>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Recent Notifications -->
+        <div class="card col-6">
+            <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 1.25rem; border-bottom: 1px solid var(--border-glass); padding-bottom: 0.5rem; display: flex; justify-content: space-between;">
+                <i class="fa-solid fa-bell"></i> Alerts
+                <a href="{% url 'notification_list' %}" style="font-size: 0.8rem; font-weight: normal;">View All</a>
+            </h3>
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                {% for notif in recent_notifications %}
+                    <div style="font-size: 0.9rem; border-bottom: 1px solid rgba(255,255,255,0.03); padding-bottom: 0.5rem;">
+                        <strong style="color: var(--text-primary); {% if not notif.is_read %}border-left: 2px solid var(--primary); padding-left: 0.25rem;{% endif %}">{{ notif.title }}</strong>
+                        <p style="color: var(--text-secondary); margin-top: 0.15rem; font-size: 0.85rem;">{{ notif.message }}</p>
+                    </div>
+                {% empty %}
+                    <span style="color: var(--text-secondary); font-style: italic;">No notifications.</span>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Payslips Widget -->
+        <div class="card col-6">
+            <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 1.25rem; border-bottom: 1px solid var(--border-glass); padding-bottom: 0.5rem; display: flex; justify-content: space-between;">
+                <i class="fa-solid fa-wallet"></i> Recent Payslips
+                <a href="{% url 'payroll_list' %}" style="font-size: 0.8rem; font-weight: normal;">View History</a>
+            </h3>
+            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                {% for pay in payslips %}
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem;">
+                        <span>{{ pay.get_month_display }} {{ pay.year }}</span>
+                        <strong style="color: var(--success);">${{ pay.net_salary }}</strong>
+                        <a href="{% url 'report_payslip' pay.pk %}" class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" target="_blank" id="btn_dash_download_{{ pay.id }}">
+                            <i class="fa-solid fa-file-pdf"></i> PDF
+                        </a>
+                    </div>
+                {% empty %}
+                    <span style="color: var(--text-secondary); font-style: italic;">No payslip records.</span>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

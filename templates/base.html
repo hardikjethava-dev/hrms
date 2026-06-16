@@ -1,0 +1,206 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}HRMS Portal{% endblock %}</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Core CSS -->
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    <div class="app-container">
+        {% if user.is_authenticated %}
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="brand-section">
+                <div class="brand-logo">H</div>
+                <span>HRMS Core</span>
+            </div>
+
+            <nav style="flex-grow: 1;">
+                <ul class="menu-list">
+                    <li class="menu-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                        <a href="{% url 'dashboard' %}">
+                            <i class="fa-solid fa-chart-pie"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+
+                    <!-- Common to all authenticated employees -->
+                    <li class="menu-item {% if '/employees/' in request.path %}active{% endif %}">
+                        <a href="{% url 'employee_list' %}">
+                            <i class="fa-solid fa-users"></i>
+                            <span>Directory</span>
+                        </a>
+                    </li>
+
+                    <li class="menu-item {% if '/attendance/' in request.path %}active{% endif %}">
+                        <a href="{% url 'attendance_list' %}">
+                            <i class="fa-solid fa-clock"></i>
+                            <span>Attendance</span>
+                        </a>
+                    </li>
+
+                    <li class="menu-item {% if '/leaves/' in request.path %}active{% endif %}">
+                        <a href="{% url 'leave_list' %}">
+                            <i class="fa-solid fa-calendar-minus"></i>
+                            <span>Leaves</span>
+                        </a>
+                    </li>
+
+                    <li class="menu-item {% if '/payroll/' in request.path %}active{% endif %}">
+                        <a href="{% url 'payroll_list' %}">
+                            <i class="fa-solid fa-wallet"></i>
+                            <span>Payroll</span>
+                        </a>
+                    </li>
+
+                    <!-- Role-Specific Views: HR Managers & Admins -->
+                    {% if user.role == 'Super Admin' or user.role == 'HR Manager' %}
+                    <li class="menu-item {% if '/recruitment/' in request.path %}active{% endif %}">
+                        <a href="{% url 'recruitment_list' %}">
+                            <i class="fa-solid fa-briefcase"></i>
+                            <span>Recruitment</span>
+                        </a>
+                    </li>
+                    {% endif %}
+
+                    <!-- Performance and Goals -->
+                    <li class="menu-item {% if '/performance/' in request.path %}active{% endif %}">
+                        <a href="{% url 'performance_list' %}">
+                            <i class="fa-solid fa-award"></i>
+                            <span>Performance</span>
+                        </a>
+                    </li>
+
+                    <!-- Assets & Inventories -->
+                    <li class="menu-item {% if '/assets/' in request.path %}active{% endif %}">
+                        <a href="{% url 'asset_list' %}">
+                            <i class="fa-solid fa-laptop-code"></i>
+                            <span>Assets</span>
+                        </a>
+                    </li>
+
+                    <!-- Documents Vault -->
+                    <li class="menu-item {% if '/documents/' in request.path %}active{% endif %}">
+                        <a href="{% url 'document_list' %}">
+                            <i class="fa-solid fa-file-invoice"></i>
+                            <span>Documents</span>
+                        </a>
+                    </li>
+
+                    <!-- Admin & Auditing -->
+                    {% if user.role == 'Super Admin' %}
+                    <li class="menu-item {% if '/auditlogs/' in request.path %}active{% endif %}">
+                        <a href="{% url 'audit_list' %}">
+                            <i class="fa-solid fa-shield-halved"></i>
+                            <span>Audit Logs</span>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+
+            <!-- User profile component at bottom -->
+            <div class="user-profile-widget">
+                <div class="user-avatar">
+                    {% if user.employee_profile.profile_picture %}
+                        <img src="{{ user.employee_profile.profile_picture.url }}" alt="Profile Pic">
+                    {% else %}
+                        <span>{{ user.email|slice:":2"|upper }}</span>
+                    {% endif %}
+                </div>
+                <div class="user-info">
+                    <span class="user-name">{{ user.employee_profile.first_name|default:"User" }}</span>
+                    <span class="user-role">{{ user.role }}</span>
+                </div>
+                <a href="{% url 'logout' %}" style="margin-left: auto; color: var(--text-secondary);" title="Sign Out">
+                    <i class="fa-solid fa-power-off"></i>
+                </a>
+            </div>
+        </aside>
+        {% endif %}
+
+        <main class="main-content">
+            {% if user.is_authenticated %}
+            <!-- Top Header Navbar -->
+            <header class="top-navbar">
+                <div class="page-title">
+                    {% block page_header %}HR Management System{% endblock %}
+                </div>
+
+                <div class="navbar-actions">
+                    <!-- Notifications Dropdown trigger -->
+                    <div class="notification-badge" onclick="location.href='{% url 'notification_list' %}'">
+                        <i class="fa-regular fa-bell"></i>
+                        <span class="badge-count" id="unread-count">0</span>
+                    </div>
+
+                    <span style="font-size: 0.9rem; color: var(--text-secondary)">
+                        {{ user.email }}
+                    </span>
+                </div>
+            </header>
+            {% endif %}
+
+            <!-- Core Content Frame -->
+            <div class="content-frame">
+                <!-- Alert Messages -->
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %}">
+                            <i class="fa-solid fa-circle-info"></i>
+                            <span>{{ message }}</span>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+    </div>
+
+    <!-- Script triggers and animations -->
+    <script>
+        // Micro animation hover triggers
+        document.querySelectorAll('.menu-item').forEach(item => {
+            item.addEventListener('mouseenter', () => {
+                const icon = item.querySelector('i');
+                if(icon) icon.classList.add('fa-bounce');
+            });
+            item.addEventListener('mouseleave', () => {
+                const icon = item.querySelector('i');
+                if(icon) icon.classList.remove('fa-bounce');
+            });
+        });
+
+        // Async Notification Fetcher
+        function updateNotifications() {
+            fetch('/notifications/unread-count/')
+                .then(res => res.json())
+                .then(data => {
+                    const badge = document.getElementById('unread-count');
+                    if(badge) {
+                        badge.innerText = data.count;
+                        badge.style.display = data.count > 0 ? 'inline-block' : 'none';
+                    }
+                })
+                .catch(() => {});
+        }
+        {% if user.is_authenticated %}
+        setInterval(updateNotifications, 10000);
+        updateNotifications();
+        {% endif %}
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }} - HRMS Portal{% endblock %}
+{% block page_header %}{{ title }}{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 0 auto;">
+    <div class="card">
+        <h2 style="font-size: 1.5rem; margin-bottom: 1.5rem; font-weight: 600;">Job Opening</h2>
+        <form method="POST">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label class="form-label" for="job_title">Job Title</label>
+                {{ form.title }}
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="job_dept">Department</label>
+                {{ form.department }}
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="job_desc">Description</label>
+                {{ form.description }}
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="job_vacancies">Number of Vacancies</label>
+                {{ form.vacancies }}
+            </div>
+
+            <div class="form-group" style="margin-bottom: 2rem;">
+                <label class="form-label" for="job_status">Status</label>
+                {{ form.status }}
+            </div>
+
+            <div style="display: flex; gap: 1rem;">
+                <button type="submit" class="btn btn-primary" id="btn_save_job">Post Job</button>
+                <a href="{% url 'recruitment_list' %}" class="btn btn-secondary" id="btn_cancel_job">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+{% block title %}Assets - HRMS Portal{% endblock %}
+{% block page_header %}Asset Management{% endblock %}
+
+{% block content %}
+<div style="display: flex; flex-direction: column; gap: 2rem;">
+    <!-- Actions and header -->
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <span style="color: var(--text-secondary);">Track and allocate hardware and equipment</span>
+        {% if is_manager %}
+            <div style="display: flex; gap: 0.75rem;">
+                <a href="{% url 'asset_add' %}" class="btn btn-primary" id="btn_register_asset">
+                    <i class="fa-solid fa-plus"></i> Register Asset
+                </a>
+                <a href="{% url 'asset_allocate' %}" class="btn btn-secondary" id="btn_allocate_asset">
+                    <i class="fa-solid fa-handshake"></i> Allocate Asset
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+    {% if is_manager %}
+        <!-- Manager Assets List Card -->
+        <div class="card">
+            <h3 style="font-size: 1.2rem; font-weight: 600; margin-bottom: 1rem;">Asset Registry</h3>
+            <div class="table-container">
+                <table class="custom-table">
+                    <thead>
+                        <tr>
+                            <th>Asset Code</th>
+                            <th>Name</th>
+                            <th>Category</th>
+                            <th>Purchase Date</th>
+                            <th>Value</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for asset in assets %}
+                            <tr>
+                                <td><strong style="color: var(--text-primary); font-family: monospace;">{{ asset.asset_code }}</strong></td>
+                                <td>{{ asset.name }}</td>
+                                <td>{{ asset.category }}</td>
+                                <td>{{ asset.purchase_date }}</td>
+                                <td>${{ asset.value }}</td>
+                                <td>
+                                    <span class="badge {% if asset.status == 'Available' %}badge-success{% elif asset.status == 'Allocated' %}badge-info{% elif asset.status == 'Maintenance' %}badge-warning{% else %}badge-danger{% endif %}">
+                                        {{ asset.status }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="{% url 'asset_edit' asset.pk %}" class="btn btn-secondary" style="padding: 0.4rem 0.75rem; font-size: 0.8rem;" id="btn_edit_asset_{{ asset.id }}">Edit</a>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="7" style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+                                    No assets registered.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Allocations Card -->
+    <div class="card">
+        <h3 style="font-size: 1.2rem; font-weight: 600; margin-bottom: 1rem;">
+            {% if is_manager %}Active Allocations{% else %}My Allocated Assets{% endif %}
+        </h3>
+        
+        <div class="table-container">
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th>Asset Name</th>
+                        <th>Category</th>
+                        {% if is_manager %}
+                            <th>Allocated To</th>
+                        {% endif %}
+                        <th>Allocated Date</th>
+                        <th>Returned Date</th>
+                        {% if is_manager %}
+                            <th>Actions</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for alloc in allocations %}
+                        <tr>
+                            <td>
+                                <strong style="color: var(--text-primary);">{{ alloc.asset.name }}</strong>
+                                <div style="font-size: 0.75rem; color: var(--text-secondary); font-family: monospace;">{{ alloc.asset.asset_code }}</div>
+                            </td>
+                            <td>{{ alloc.asset.category }}</td>
+                            {% if is_manager %}
+                                <td>
+                                    <strong style="color: var(--text-primary);">{{ alloc.employee.first_name }} {{ alloc.employee.last_name }}</strong>
+                                    <div style="font-size: 0.75rem; color: var(--text-secondary);">{{ alloc.employee.employee_id }}</div>
+                                </td>
+                            {% endif %}
+                            <td>{{ alloc.allocated_date }}</td>
+                            <td>
+                                {% if alloc.returned_date %}
+                                    {{ alloc.returned_date }}
+                                {% else %}
+                                    <span style="color: var(--warning); font-weight: 500;">Active</span>
+                                {% endif %}
+                            </td>
+                            {% if is_manager %}
+                                <td>
+                                    <a href="{% url 'allocation_edit' alloc.pk %}" class="btn btn-secondary" style="padding: 0.4rem 0.75rem; font-size: 0.8rem;" id="btn_edit_alloc_{{ alloc.id }}">
+                                        Edit / Return
+                                    </a>
+                                </td>
+                            {% endif %}
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="{% if is_manager %}6{% else %}4{% endif %}" style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+                                No asset allocations found.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

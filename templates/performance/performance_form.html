@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }} - HRMS Portal{% endblock %}
+{% block page_header %}{{ title }}{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 0 auto;">
+    <div class="card">
+        <h2 style="font-size: 1.5rem; margin-bottom: 1.5rem; font-weight: 600;">Performance Review Details</h2>
+        <form method="POST">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label class="form-label" for="review_employee">Employee under Review</label>
+                {{ form.employee }}
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="review_reviewer">Reviewer</label>
+                {{ form.reviewer }}
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    <label class="form-label" for="review_period">Review Period</label>
+                    {{ form.review_period }}
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="review_rating">Rating Score</label>
+                    {{ form.rating }}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="review_comments">Reviewer Comments</label>
+                {{ form.comments }}
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="review_goals">Goals / OKRs for Next Period</label>
+                {{ form.goals }}
+            </div>
+
+            <div class="form-group" style="margin-bottom: 2rem;">
+                <label class="form-label" for="review_date">Review Date</label>
+                {{ form.review_date }}
+            </div>
+
+            <div style="display: flex; gap: 1rem;">
+                <button type="submit" class="btn btn-primary" id="btn_save_review">Save Review</button>
+                <a href="{% url 'performance_list' %}" class="btn btn-secondary" id="btn_cancel_review">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }} - HRMS Portal{% endblock %}
+{% block page_header %}{{ title }}{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 0 auto;">
+    <div class="card">
+        <h2 style="font-size: 1.5rem; margin-bottom: 1.5rem; font-weight: 600;">Candidate Screening</h2>
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label class="form-label" for="cand_job">Job Position</label>
+                {{ form.job_position }}
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    <label class="form-label" for="cand_first_name">First Name</label>
+                    {{ form.first_name }}
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="cand_last_name">Last Name</label>
+                    {{ form.last_name }}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="cand_email">Email Address</label>
+                {{ form.email }}
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="cand_phone">Phone Number</label>
+                {{ form.phone }}
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="cand_exp">Years of Experience</label>
+                {{ form.experience }}
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="cand_resume">Resume Upload</label>
+                {{ form.resume }}
+            </div>
+
+            <div class="form-group" style="margin-bottom: 2rem;">
+                <label class="form-label" for="cand_status">Candidate Status</label>
+                {{ form.status }}
+            </div>
+
+            <div style="display: flex; gap: 1rem;">
+                <button type="submit" class="btn btn-primary" id="btn_save_candidate">Save Candidate</button>
+                <a href="{% url 'recruitment_list' %}" class="btn btn-secondary" id="btn_cancel_candidate">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

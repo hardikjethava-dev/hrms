@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block title %}Departments - HRMS Portal{% endblock %}
+{% block page_header %}Departments{% endblock %}
+
+{% block content %}
+<div style="display: flex; flex-direction: column; gap: 2rem;">
+    <!-- Actions Bar -->
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <span style="color: var(--text-secondary);">Manage company department classifications</span>
+        {% if is_manager %}
+            <a href="{% url 'department_create' %}" class="btn btn-primary" id="btn_add_department">
+                <i class="fa-solid fa-folder-plus"></i> Add Department
+            </a>
+        {% endif %}
+    </div>
+
+    <!-- Departments Grid -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem;">
+        {% for dept in departments %}
+            <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+                        <span class="badge badge-info" style="font-family: monospace;">{{ dept.code }}</span>
+                        {% if is_manager %}
+                            <a href="{% url 'department_edit' dept.pk %}" style="color: var(--text-secondary); font-size: 1rem;" title="Edit Department" id="btn_edit_dept_{{ dept.id }}">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </a>
+                        {% endif %}
+                    </div>
+                    
+                    <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-primary);">{{ dept.name }}</h3>
+                    <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.4; margin-bottom: 1.5rem;">
+                        {{ dept.description|default:"No description provided." }}
+                    </p>
+                </div>
+
+                <div style="border-top: 1px solid var(--border-glass); padding-top: 1rem; margin-top: auto; display: flex; align-items: center; justify-content: space-between; font-size: 0.85rem;">
+                    <span style="color: var(--text-secondary);">Head of Department</span>
+                    <strong style="color: var(--text-primary);">
+                        {% if dept.head %}
+                            {{ dept.head.first_name }} {{ dept.head.last_name }}
+                        {% else %}
+                            <span style="color: var(--text-secondary); font-weight: normal; font-style: italic;">Not Assigned</span>
+                        {% endif %}
+                    </strong>
+                </div>
+            </div>
+        {% empty %}
+            <div class="card col-12" style="text-align: center; padding: 3rem;">
+                <i class="fa-regular fa-folder-open" style="font-size: 3rem; color: var(--text-secondary); margin-bottom: 1rem;"></i>
+                <p style="color: var(--text-secondary);">No departments registered yet.</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

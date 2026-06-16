@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }} - HRMS Portal{% endblock %}
+{% block page_header %}{{ title }}{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 0 auto;">
+    <div class="card">
+        <h2 style="font-size: 1.5rem; margin-bottom: 1.5rem; font-weight: 600;">Apply for Leave</h2>
+        <form method="POST">
+            {% csrf_token %}
+            
+            {% if form.non_field_errors %}
+                {% for error in form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        <i class="fa-solid fa-circle-xmark"></i>
+                        <span>{{ error }}</span>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <div class="form-group">
+                <label class="form-label" for="leave_type">Leave Type</label>
+                {{ form.leave_type }}
+                {% if form.leave_type.errors %}
+                    <span style="color: var(--danger); font-size: 0.8rem;">{{ form.leave_type.errors.0 }}</span>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="leave_start">Start Date</label>
+                {{ form.start_date }}
+                {% if form.start_date.errors %}
+                    <span style="color: var(--danger); font-size: 0.8rem;">{{ form.start_date.errors.0 }}</span>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="leave_end">End Date</label>
+                {{ form.end_date }}
+                {% if form.end_date.errors %}
+                    <span style="color: var(--danger); font-size: 0.8rem;">{{ form.end_date.errors.0 }}</span>
+                {% endif %}
+            </div>
+
+            <div class="form-group" style="margin-bottom: 2rem;">
+                <label class="form-label" for="leave_reason">Reason for Leave</label>
+                {{ form.reason }}
+                {% if form.reason.errors %}
+                    <span style="color: var(--danger); font-size: 0.8rem;">{{ form.reason.errors.0 }}</span>
+                {% endif %}
+            </div>
+
+            <div style="display: flex; gap: 1rem;">
+                <button type="submit" class="btn btn-primary" id="btn_submit_leave_form">Submit Application</button>
+                <a href="{% url 'leave_list' %}" class="btn btn-secondary" id="btn_cancel_leave_form">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% block title %}Employee Directory - HRMS Portal{% endblock %}
+{% block page_header %}Employee Directory{% endblock %}
+
+{% block content %}
+<div style="display: flex; flex-direction: column; gap: 2rem;">
+    <!-- Filters Card -->
+    <div class="card" style="padding: 1.25rem;">
+        <form method="GET" style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-end;">
+            <div class="form-group" style="flex: 2; min-width: 250px; margin-bottom: 0;">
+                <label class="form-label">Search</label>
+                <input type="text" name="q" value="{{ query }}" placeholder="Search by name or Employee ID..." class="form-control" id="search_query">
+            </div>
+
+            <div class="form-group" style="flex: 1; min-width: 150px; margin-bottom: 0;">
+                <label class="form-label">Department</label>
+                <select name="dept" class="form-control" id="search_dept">
+                    <option value="">All Departments</option>
+                    {% for dept in departments %}
+                        <option value="{{ dept.id }}" {% if dept_filter == dept.id|stringformat:"s" %}selected{% endif %}>{{ dept.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group" style="flex: 1; min-width: 150px; margin-bottom: 0;">
+                <label class="form-label">Status</label>
+                <select name="status" class="form-control" id="search_status">
+                    <option value="">All Statuses</option>
+                    <option value="Active" {% if status_filter == 'Active' %}selected{% endif %}>Active</option>
+                    <option value="Probation" {% if status_filter == 'Probation' %}selected{% endif %}>Probation</option>
+                    <option value="Notice Period" {% if status_filter == 'Notice Period' %}selected{% endif %}>Notice Period</option>
+                    <option value="Resigned" {% if status_filter == 'Resigned' %}selected{% endif %}>Resigned</option>
+                    <option value="Terminated" {% if status_filter == 'Terminated' %}selected{% endif %}>Terminated</option>
+                </select>
+            </div>
+
+            <div style="display: flex; gap: 0.5rem; height: 44px;">
+                <button type="submit" class="btn btn-primary" id="btn_search_filter">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    Filter
+                </button>
+                <a href="{% url 'employee_list' %}" class="btn btn-secondary" style="display: flex; align-items: center;" id="btn_clear_filter">Clear</a>
+            </div>
+            
+            {% if is_manager %}
+            <div style="margin-left: auto; height: 44px;">
+                <a href="{% url 'employee_create' %}" class="btn btn-primary" id="btn_add_employee">
+                    <i class="fa-solid fa-user-plus"></i>
+                    Add Employee
+                </a>
+            </div>
+            {% endif %}
+        </form>
+    </div>
+
+    <!-- Directory Grid -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem;">
+        {% for employee in employees %}
+            <div class="card" style="text-align: center; display: flex; flex-direction: column; align-items: center; padding: 2rem;">
+                <div class="user-avatar" style="width: 80px; height: 80px; font-size: 2rem; margin-bottom: 1rem; border: 2px solid var(--primary);">
+                    {% if employee.profile_picture %}
+                        <img src="{{ employee.profile_picture.url }}" alt="{{ employee.first_name }}">
+                    {% else %}
+                        <span>{{ employee.first_name|slice:":1" }}{{ employee.last_name|slice:":1" }}</span>
+                    {% endif %}
+                </div>
+                
+                <h3 style="font-size: 1.15rem; font-weight: 600; margin-bottom: 0.25rem;">
+                    <a href="{% url 'employee_detail' employee.pk %}" style="color: var(--text-primary);">{{ employee.first_name }} {{ employee.last_name }}</a>
+                </h3>
+                <span style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 0.5rem;">{{ employee.designation }}</span>
+                
+                <span class="badge {% if employee.employment_status == 'Active' %}badge-success{% elif employee.employment_status == 'Terminated' or employee.employment_status == 'Resigned' %}badge-danger{% else %}badge-warning{% endif %}" style="margin-bottom: 1.25rem;">
+                    {{ employee.employment_status }}
+                </span>
+
+                <div style="width: 100%; border-top: 1px solid var(--border-glass); padding-top: 1rem; margin-top: auto; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.85rem; color: var(--text-secondary);">
+                    <div>
+                        <i class="fa-solid fa-building" style="margin-right: 0.25rem;"></i>
+                        {{ employee.department.name|default:"No Department" }}
+                    </div>
+                    <div>
+                        <i class="fa-solid fa-id-card" style="margin-right: 0.25rem;"></i>
+                        {{ employee.employee_id }}
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="card col-12" style="text-align: center; padding: 3rem;">
+                <i class="fa-regular fa-folder-open" style="font-size: 3rem; color: var(--text-secondary); margin-bottom: 1rem;"></i>
+                <p style="color: var(--text-secondary);">No employees found matching the filters.</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

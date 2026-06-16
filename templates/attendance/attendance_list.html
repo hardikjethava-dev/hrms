@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% block title %}Attendance Log - HRMS Portal{% endblock %}
+{% block page_header %}Attendance Log{% endblock %}
+
+{% block content %}
+<div style="display: flex; flex-direction: column; gap: 2rem;">
+    <!-- Filters Card -->
+    <div class="card" style="padding: 1.25rem;">
+        <form method="GET" style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-end;">
+            {% if is_manager %}
+            <div class="form-group" style="flex: 2; min-width: 200px; margin-bottom: 0;">
+                <label class="form-label">Employee</label>
+                <select name="employee" class="form-control" id="filter_employee">
+                    <option value="">All Employees</option>
+                    {% for emp in employees %}
+                        <option value="{{ emp.id }}" {% if emp_filter == emp.id|stringformat:"s" %}selected{% endif %}>{{ emp.first_name }} {{ emp.last_name }} ({{ emp.employee_id }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endif %}
+
+            <div class="form-group" style="flex: 1; min-width: 150px; margin-bottom: 0;">
+                <label class="form-label">Start Date</label>
+                <input type="date" name="start_date" value="{{ start_date }}" class="form-control" id="filter_start_date">
+            </div>
+
+            <div class="form-group" style="flex: 1; min-width: 150px; margin-bottom: 0;">
+                <label class="form-label">End Date</label>
+                <input type="date" name="end_date" value="{{ end_date }}" class="form-control" id="filter_end_date">
+            </div>
+
+            <div style="display: flex; gap: 0.5rem; height: 44px;">
+                <button type="submit" class="btn btn-primary" id="btn_filter_attendance">
+                    <i class="fa-solid fa-filter"></i> Filter
+                </button>
+                <a href="{% url 'attendance_list' %}" class="btn btn-secondary" style="display: flex; align-items: center;" id="btn_clear_attendance">Clear</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Attendance Table Card -->
+    <div class="card">
+        <h3 style="font-size: 1.2rem; font-weight: 600; margin-bottom: 1rem;">Daily Records</h3>
+        
+        <div class="table-container">
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        {% if is_manager %}
+                            <th>Employee</th>
+                        {% endif %}
+                        <th>Date</th>
+                        <th>Clock In</th>
+                        <th>Clock Out</th>
+                        <th>Worked Hours</th>
+                        <th>Status</th>
+                        <th>Remarks</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in attendances %}
+                        <tr>
+                            {% if is_manager %}
+                                <td>
+                                    <strong style="color: var(--text-primary);">{{ record.employee.first_name }} {{ record.employee.last_name }}</strong>
+                                    <div style="font-size: 0.75rem; color: var(--text-secondary);">{{ record.employee.employee_id }}</div>
+                                </td>
+                            {% endif %}
+                            <td>{{ record.date }}</td>
+                            <td>{{ record.check_in|default:"-" }}</td>
+                            <td>{{ record.check_out|default:"-" }}</td>
+                            <td>{{ record.working_hours|default:"-" }}</td>
+                            <td>
+                                <span class="badge {% if record.status == 'Present' %}badge-success{% elif record.status == 'Absent' %}badge-danger{% elif record.status == 'Half Day' or record.status == 'Leave' %}badge-warning{% else %}badge-info{% endif %}">
+                                    {{ record.status }}
+                                </span>
+                            </td>
+                            <td style="font-size: 0.85rem; color: var(--text-secondary);">{{ record.remarks|default:"-" }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="{% if is_manager %}7{% else %}6{% endif %}" style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+                                No attendance records found.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

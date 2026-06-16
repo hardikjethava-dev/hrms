@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block title %}Sign In - HRMS Portal{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+    <div class="card auth-card">
+        <div class="auth-header">
+            <div class="brand-logo" style="margin: 0 auto 1rem; width: 50px; height: 50px; font-size: 1.5rem;">H</div>
+            <h1 class="auth-title">HRMS Portal</h1>
+            <p class="auth-subtitle">Sign in to manage your workspace</p>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %}">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <span>{{ message }}</span>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="POST" action="{% url 'login' %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="login_email" class="form-label">Email Address</label>
+                {{ form.email }}
+            </div>
+            
+            <div class="form-group" style="margin-bottom: 2rem;">
+                <label for="login_password" class="form-label">Password</label>
+                {{ form.password }}
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; height: 48px;">
+                Sign In
+                <i class="fa-solid fa-arrow-right-to-bracket" style="margin-left: 0.25rem;"></i>
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block title %}System Audit Logs - HRMS Portal{% endblock %}
+{% block page_header %}System Audit Logs{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h3 style="font-size: 1.2rem; font-weight: 600; margin-bottom: 1.5rem;">Audit Trail</h3>
+    
+    <div class="table-container">
+        <table class="custom-table">
+            <thead>
+                <tr>
+                    <th>Timestamp</th>
+                    <th>User</th>
+                    <th>Action</th>
+                    <th>Model</th>
+                    <th>Object ID</th>
+                    <th>IP Address</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                    <tr>
+                        <td style="font-size: 0.85rem; font-family: monospace;">{{ log.timestamp }}</td>
+                        <td>
+                            {% if log.user %}
+                                <strong style="color: var(--text-primary);">{{ log.user.email }}</strong>
+                                <span style="font-size: 0.75rem; color: var(--text-secondary); display: block;">{{ log.user.role }}</span>
+                            {% else %}
+                                <span style="color: var(--text-secondary); font-style: italic;">Anonymous / System</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge {% if log.action == 'Create' or log.action == 'Login' %}badge-success{% elif log.action == 'Delete' or log.action == 'Logout' %}badge-danger{% else %}badge-warning{% endif %}">
+                                {{ log.action }}
+                            </span>
+                        </td>
+                        <td>{{ log.model_name|default:"-" }}</td>
+                        <td style="font-size: 0.85rem; font-family: monospace;">{{ log.object_id|default:"-" }}</td>
+                        <td style="font-size: 0.85rem; font-family: monospace;">{{ log.ip_address|default:"-" }}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+                            No audit log entries.
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

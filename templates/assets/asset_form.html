@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }} - HRMS Portal{% endblock %}
+{% block page_header %}{{ title }}{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 0 auto;">
+    <div class="card">
+        <h2 style="font-size: 1.5rem; margin-bottom: 1.5rem; font-weight: 600;">Asset Details</h2>
+        <form method="POST">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label class="form-label" for="asset_code">Asset Code</label>
+                {{ form.asset_code }}
+                {% if form.asset_code.errors %}
+                    <span style="color: var(--danger); font-size: 0.8rem;">{{ form.asset_code.errors.0 }}</span>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="asset_name">Asset Name</label>
+                {{ form.name }}
+                {% if form.name.errors %}
+                    <span style="color: var(--danger); font-size: 0.8rem;">{{ form.name.errors.0 }}</span>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="asset_cat">Category</label>
+                {{ form.category }}
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="asset_date">Purchase Date</label>
+                {{ form.purchase_date }}
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="asset_val">Asset Value</label>
+                {{ form.value }}
+            </div>
+
+            <div class="form-group" style="margin-bottom: 2rem;">
+                <label class="form-label" for="asset_status">Status</label>
+                {{ form.status }}
+            </div>
+
+            <div style="display: flex; gap: 1rem;">
+                <button type="submit" class="btn btn-primary" id="btn_save_asset">Save Asset</button>
+                <a href="{% url 'asset_list' %}" class="btn btn-secondary" id="btn_cancel_asset">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

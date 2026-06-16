@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }} - HRMS Portal{% endblock %}
+{% block page_header %}{{ title }}{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 0 auto;">
+    <div class="card">
+        <h2 style="font-size: 1.5rem; margin-bottom: 1.5rem; font-weight: 600;">{{ title }}</h2>
+        <form method="POST">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label class="form-label" for="dept_name">Department Name</label>
+                {{ form.name }}
+                {% if form.name.errors %}
+                    <span style="color: var(--danger); font-size: 0.8rem;">{{ form.name.errors.0 }}</span>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="dept_code">Department Code</label>
+                {{ form.code }}
+                {% if form.code.errors %}
+                    <span style="color: var(--danger); font-size: 0.8rem;">{{ form.code.errors.0 }}</span>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="dept_desc">Description</label>
+                {{ form.description }}
+                {% if form.description.errors %}
+                    <span style="color: var(--danger); font-size: 0.8rem;">{{ form.description.errors.0 }}</span>
+                {% endif %}
+            </div>
+
+            <div class="form-group" style="margin-bottom: 2rem;">
+                <label class="form-label" for="dept_head">Head of Department (Manager)</label>
+                {{ form.head }}
+                {% if form.head.errors %}
+                    <span style="color: var(--danger); font-size: 0.8rem;">{{ form.head.errors.0 }}</span>
+                {% endif %}
+            </div>
+
+            <div style="display: flex; gap: 1rem;">
+                <button type="submit" class="btn btn-primary" id="btn_save_dept">Save Department</button>
+                <a href="{% url 'department_list' %}" class="btn btn-secondary" id="btn_cancel_dept">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

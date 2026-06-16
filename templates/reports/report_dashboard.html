@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block title %}Report Generator - HRMS Portal{% endblock %}
+{% block page_header %}Report Generator{% endblock %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 2rem;">
+    <span style="color: var(--text-secondary);">Select report type and format to download analytical archives</span>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem;">
+        <!-- Employees Report Card -->
+        <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; gap: 1rem;">
+            <div>
+                <h4 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 0.5rem;"><i class="fa-solid fa-users"></i> Employees Directory</h4>
+                <p style="color: var(--text-secondary); font-size: 0.85rem; line-height: 1.4;">Export listing profiles, department mapping, roles, and status fields.</p>
+            </div>
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                <a href="{% url 'export_report' %}?type=employees&format=csv" class="btn btn-secondary" style="padding: 0.4rem 0.75rem; font-size: 0.8rem; flex: 1;">CSV</a>
+                <a href="{% url 'export_report' %}?type=employees&format=excel" class="btn btn-secondary" style="padding: 0.4rem 0.75rem; font-size: 0.8rem; flex: 1;">Excel</a>
+                <a href="{% url 'export_report' %}?type=employees&format=pdf" class="btn btn-primary" style="padding: 0.4rem 0.75rem; font-size: 0.8rem; flex: 1;">PDF</a>
+            </div>
+        </div>
+
+        <!-- Attendance Report Card -->
+        <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; gap: 1rem;">
+            <div>
+                <h4 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 0.5rem;"><i class="fa-solid fa-clock"></i> Attendance logs</h4>
+                <p style="color: var(--text-secondary); font-size: 0.85rem; line-height: 1.4;">Export check-in/out timestamps, worked duration, and presence status.</p>
+            </div>
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                <a href="{% url 'export_report' %}?type=attendance&format=csv" class="btn btn-secondary" style="padding: 0.4rem 0.75rem; font-size: 0.8rem; flex: 1;">CSV</a>
+                <a href="{% url 'export_report' %}?type=attendance&format=excel" class="btn btn-secondary" style="padding: 0.4rem 0.75rem; font-size: 0.8rem; flex: 1;">Excel</a>
+                <a href="{% url 'export_report' %}?type=attendance&format=pdf" class="btn btn-primary" style="padding: 0.4rem 0.75rem; font-size: 0.8rem; flex: 1;">PDF</a>
+            </div>
+        </div>
+
+        <!-- Leaves Report Card -->
+        <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; gap: 1rem;">
+            <div>
+                <h4 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 0.5rem;"><i class="fa-solid fa-plane-departure"></i> Leave Applications</h4>
+                <p style="color: var(--text-secondary); font-size: 0.85rem; line-height: 1.4;">Export detailed requests tracker: approvals, rejections, types, and durations.</p>
+            </div>
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                <a href="{% url 'export_report' %}?type=leaves&format=csv" class="btn btn-secondary" style="padding: 0.4rem 0.75rem; font-size: 0.8rem; flex: 1;">CSV</a>
+                <a href="{% url 'export_report' %}?type=leaves&format=excel" class="btn btn-secondary" style="padding: 0.4rem 0.75rem; font-size: 0.8rem; flex: 1;">Excel</a>
+                <a href="{% url 'export_report' %}?type=leaves&format=pdf" class="btn btn-primary" style="padding: 0.4rem 0.75rem; font-size: 0.8rem; flex: 1;">PDF</a>
+            </div>
+        </div>
+
+        <!-- Payroll Report Card -->
+        <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; gap: 1rem;">
+            <div>
+                <h4 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 0.5rem;"><i class="fa-solid fa-wallet"></i> Compensation & Payroll</h4>
+                <p style="color: var(--text-secondary); font-size: 0.85rem; line-height: 1.4;">Export gross earnings, monthly base salaries, deductions, and net payouts.</p>
+            </div>
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                <a href="{% url 'export_report' %}?type=payroll&format=csv" class="btn btn-secondary" style="padding: 0.4rem 0.75rem; font-size: 0.8rem; flex: 1;">CSV</a>
+                <a href="{% url 'export_report' %}?type=payroll&format=excel" class="btn btn-secondary" style="padding: 0.4rem 0.75rem; font-size: 0.8rem; flex: 1;">Excel</a>
+                <a href="{% url 'export_report' %}?type=payroll&format=pdf" class="btn btn-primary" style="padding: 0.4rem 0.75rem; font-size: 0.8rem; flex: 1;">PDF</a>
+            </div>
+        </div>
+
+        <!-- Recruitment Pipeline Card -->
+        <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; gap: 1rem;">
+            <div>
+                <h4 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 0.5rem;"><i class="fa-solid fa-briefcase"></i> Recruitment Pipeline</h4>
+                <p style="color: var(--text-secondary); font-size: 0.85rem; line-height: 1.4;">Export screening metrics, candidates applied, and interview status trackers.</p>
+            </div>
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                <a href="{% url 'export_report' %}?type=recruitment&format=csv" class="btn btn-secondary" style="padding: 0.4rem 0.75rem; font-size: 0.8rem; flex: 1;">CSV</a>
+                <a href="{% url 'export_report' %}?type=recruitment&format=excel" class="btn btn-secondary" style="padding: 0.4rem 0.75rem; font-size: 0.8rem; flex: 1;">Excel</a>
+                <a href="{% url 'export_report' %}?type=recruitment&format=pdf" class="btn btn-primary" style="padding: 0.4rem 0.75rem; font-size: 0.8rem; flex: 1;">PDF</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
