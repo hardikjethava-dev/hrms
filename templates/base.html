@@ -14,6 +14,12 @@
     <!-- Core CSS -->
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
     {% block extra_css %}{% endblock %}
+    <script>
+        (function() {
+            const theme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
 </head>
 <body>
 
@@ -139,6 +145,11 @@
                 </div>
 
                 <div class="navbar-actions">
+                    <!-- Theme Toggle -->
+                    <button id="theme-toggle" style="background: none; border: none; font-size: 1.25rem; color: var(--text-secondary); cursor: pointer; transition: var(--transition-all); margin-right: 0.5rem; display: flex; align-items: center;" title="Toggle Light/Dark Theme">
+                        <i class="fa-solid fa-sun" id="theme-toggle-icon"></i>
+                    </button>
+
                     <!-- Notifications Dropdown trigger -->
                     <div class="notification-badge" onclick="location.href='{% url 'notification_list' %}'">
                         <i class="fa-regular fa-bell"></i>
@@ -150,6 +161,13 @@
                     </span>
                 </div>
             </header>
+            {% else %}
+            <!-- Floating Theme Toggle for Unauthenticated Screens -->
+            <div style="position: absolute; top: 1.5rem; right: 1.5rem; z-index: 1000;">
+                <button id="theme-toggle" style="background: var(--bg-secondary); border: 1px solid var(--border-glass); font-size: 1.2rem; color: var(--text-secondary); cursor: pointer; transition: var(--transition-all); width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-md);" title="Toggle Light/Dark Theme">
+                    <i class="fa-solid fa-sun" id="theme-toggle-icon"></i>
+                </button>
+            </div>
             {% endif %}
 
             <!-- Core Content Frame -->
@@ -200,6 +218,34 @@
         setInterval(updateNotifications, 10000);
         updateNotifications();
         {% endif %}
+
+        // Theme toggler
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const themeIcon = document.getElementById('theme-toggle-icon');
+
+        function updateThemeUI(theme) {
+            if (themeIcon) {
+                if (theme === 'light') {
+                    themeIcon.className = 'fa-solid fa-moon';
+                } else {
+                    themeIcon.className = 'fa-solid fa-sun';
+                }
+            }
+        }
+
+        const currentTheme = localStorage.getItem('theme') || 'dark';
+        updateThemeUI(currentTheme);
+
+        if (themeToggleBtn) {
+            themeToggleBtn.addEventListener('click', () => {
+                const activeTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+                const nextTheme = activeTheme === 'light' ? 'dark' : 'light';
+                
+                document.documentElement.setAttribute('data-theme', nextTheme);
+                localStorage.setItem('theme', nextTheme);
+                updateThemeUI(nextTheme);
+            });
+        }
     </script>
     {% block extra_js %}{% endblock %}
 </body>
