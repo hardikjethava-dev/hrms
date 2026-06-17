@@ -1,70 +1,80 @@
-# HRMS (Human Resource Management System)
+# HRMS - Human Resource Management System
 
-## Project Overview
+## Project Goal
 
-Build a complete enterprise-grade Human Resource Management System (HRMS) using **only Django Framework**.
+Build a production-ready Human Resource Management System (HRMS) using only Django Framework.
 
-### Core Technology Stack
+The application should be suitable for small and medium organizations and follow enterprise-grade architecture, coding standards, security practices, and deployment requirements.
+
+---
+
+# Technology Stack
+
+## Backend
 
 * Python 3.12+
 * Django 5.x
+* PostgreSQL
 * Django ORM
 * Django Templates
-* Django Authentication System
-* Django Middleware
-* Django Signals
 * Django Forms
+* Django Authentication
 * Django Admin
+
+## Deployment
+
+* Render
+* Gunicorn
+* WhiteNoise
+
+## Storage
+
+* Local Storage (Development)
+* Render Persistent Disk or AWS S3 (Production Ready)
+
+---
+
+# Strict Rules
+
+## Allowed
+
+* Django
+* Django ORM
+* Django Signals
+* Django Middleware
+* Django Templates
 * PostgreSQL
 
-### Do NOT Use
+## Not Allowed
 
 * Django REST Framework
 * FastAPI
 * Flask
 * React
-* Vue
 * Angular
+* Vue
 * Next.js
-* Celery (initial version)
+* Celery
+* Redis
 * Microservices
-* External Authentication Providers
 
-Everything must be implemented using standard Django architecture.
-
----
-
-# System Goals
-
-Create a scalable HRMS capable of handling:
-
-* Employee Management
-* Organization Structure
-* Attendance Management
-* Leave Management
-* Payroll
-* Recruitment
-* Performance Reviews
-* Asset Management
-* Document Management
-* Shift Management
-* Holidays
-* Notifications
-* Reports
-* Audit Logs
+Use Django's built-in capabilities whenever possible.
 
 ---
 
-# Architecture
-
-Use Modular Monolithic Architecture.
+# Project Structure
 
 ```text
 hrms/
 │
 ├── config/
+│   ├── settings/
+│   ├── urls.py
+│   ├── wsgi.py
+│   └── asgi.py
 │
 ├── apps/
+│   ├── core/
 │   ├── accounts/
 │   ├── employees/
 │   ├── departments/
@@ -84,40 +94,33 @@ hrms/
 ├── templates/
 ├── static/
 ├── media/
-└── requirements/
+├── requirements/
+├── manage.py
+├── render.yaml
+└── README.md
 ```
 
 ---
 
-# User Roles
+# Base Models
 
-Implement Role Based Access Control (RBAC).
+Create reusable abstract models.
 
-## Roles
+## TimeStampedModel
 
-### Super Admin
+```python
+created_at
+updated_at
+```
 
-Full system access.
+## SoftDeleteModel
 
-### HR Manager
+```python
+is_deleted
+deleted_at
+```
 
-* Manage employees
-* Manage recruitment
-* Manage payroll
-* Approve leave
-
-### Department Manager
-
-* View team members
-* Approve leave
-* Review performance
-
-### Employee
-
-* View profile
-* Apply leave
-* Check attendance
-* View payslips
+All business models should inherit from TimeStampedModel.
 
 ---
 
@@ -125,37 +128,60 @@ Full system access.
 
 App: accounts
 
-## Features
-
-### User Model
-
-Create Custom User Model.
+## Custom User Model
 
 Fields:
 
 ```python
 email
 employee_code
+role
 is_active
 is_staff
-role
+is_superuser
+last_login
 created_at
 updated_at
 ```
 
-Use:
+Authentication should use:
 
 ```python
 AUTH_USER_MODEL
 ```
 
-### Authentication
+Email should be unique.
 
-* Login
-* Logout
-* Password Reset
-* Change Password
-* Session Management
+Username field should be email.
+
+---
+
+# Role Based Access Control
+
+## Roles
+
+### Super Admin
+
+* Full access
+
+### HR Manager
+
+* Employee management
+* Recruitment
+* Payroll
+* Reports
+
+### Department Manager
+
+* Team management
+* Leave approvals
+* Performance reviews
+
+### Employee
+
+* Self-service portal
+
+Use Django Groups and Permissions.
 
 ---
 
@@ -163,18 +189,19 @@ AUTH_USER_MODEL
 
 App: employees
 
-## Employee Model
+## Employee
 
 Fields:
 
 ```python
 employee_id
+user
 first_name
 last_name
-email
-phone
-date_of_birth
 gender
+date_of_birth
+phone
+personal_email
 joining_date
 employment_type
 employment_status
@@ -182,23 +209,31 @@ designation
 department
 manager
 address
+city
+state
+country
+postal_code
 profile_picture
 ```
 
-### Employment Types
+Employment Types:
 
-* Full Time
-* Part Time
-* Contract
-* Intern
+```text
+Full Time
+Part Time
+Contract
+Intern
+```
 
-### Employment Status
+Employment Status:
 
-* Active
-* Probation
-* Notice Period
-* Resigned
-* Terminated
+```text
+Active
+Probation
+Notice Period
+Resigned
+Terminated
+```
 
 ---
 
@@ -215,7 +250,13 @@ name
 code
 description
 head
-created_at
+```
+
+Constraints:
+
+```python
+name unique
+code unique
 ```
 
 ---
@@ -234,24 +275,27 @@ date
 check_in
 check_out
 working_hours
+overtime_hours
 status
 remarks
 ```
 
-### Attendance Status
+Status:
 
-* Present
-* Absent
-* Half Day
-* Holiday
-* Leave
+```text
+Present
+Absent
+Half Day
+Leave
+Holiday
+```
 
-### Features
+Features:
 
-* Daily attendance
-* Monthly attendance
-* Late arrival tracking
-* Overtime calculation
+* Daily Attendance
+* Monthly Attendance
+* Late Arrival Tracking
+* Overtime Calculation
 
 ---
 
@@ -259,20 +303,15 @@ remarks
 
 App: leaves
 
-## Leave Types
+## LeaveType
 
 ```python
-Annual Leave
-Sick Leave
-Casual Leave
-Maternity Leave
-Paternity Leave
-Unpaid Leave
+name
+days_per_year
+is_paid
 ```
 
-## Leave Request
-
-Fields:
+## LeaveRequest
 
 ```python
 employee
@@ -285,21 +324,21 @@ approved_by
 approved_at
 ```
 
-### Status
+Status:
 
-```python
+```text
 Pending
 Approved
 Rejected
 Cancelled
 ```
 
-### Features
+Features:
 
-* Apply leave
-* Approve leave
-* Leave balance tracking
-* Leave history
+* Leave Application
+* Approval Workflow
+* Leave Balance
+* Leave History
 
 ---
 
@@ -307,9 +346,7 @@ Cancelled
 
 App: payroll
 
-## Salary Structure
-
-Fields:
+## SalaryStructure
 
 ```python
 employee
@@ -320,25 +357,23 @@ deductions
 effective_date
 ```
 
-## Payroll Record
-
-Fields:
+## Payroll
 
 ```python
 employee
 month
 year
 gross_salary
-deduction_amount
+total_deductions
 net_salary
 generated_at
 ```
 
-### Features
+Features:
 
-* Monthly payroll generation
-* Payslip generation
-* Salary history
+* Payroll Generation
+* Payslip Generation
+* Salary History
 
 ---
 
@@ -346,9 +381,7 @@ generated_at
 
 App: recruitment
 
-## Job Position
-
-Fields:
+## JobOpening
 
 ```python
 title
@@ -360,8 +393,6 @@ status
 
 ## Candidate
 
-Fields:
-
 ```python
 first_name
 last_name
@@ -372,9 +403,9 @@ experience
 status
 ```
 
-### Candidate Status
+Status:
 
-```python
+```text
 Applied
 Screening
 Interview
@@ -389,9 +420,7 @@ Hired
 
 App: performance
 
-## Performance Review
-
-Fields:
+## Review
 
 ```python
 employee
@@ -403,14 +432,14 @@ goals
 review_date
 ```
 
-### Rating Scale
+Rating:
 
-```python
-1 - Poor
-2 - Fair
-3 - Good
-4 - Very Good
-5 - Excellent
+```text
+1 Poor
+2 Fair
+3 Good
+4 Very Good
+5 Excellent
 ```
 
 ---
@@ -421,20 +450,16 @@ App: assets
 
 ## Asset
 
-Fields:
-
 ```python
 asset_code
 name
 category
 purchase_date
-value
+purchase_price
 status
 ```
 
-## Asset Allocation
-
-Fields:
+## AssetAllocation
 
 ```python
 asset
@@ -449,26 +474,23 @@ returned_date
 
 App: documents
 
-## Employee Documents
-
-Fields:
+## EmployeeDocument
 
 ```python
 employee
 document_type
 file
-uploaded_at
 expiry_date
 ```
 
-### Types
+Types:
 
-```python
+```text
 Resume
 Offer Letter
 Contract
-ID Proof
 Certificate
+Government ID
 Other
 ```
 
@@ -480,8 +502,6 @@ App: shifts
 
 ## Shift
 
-Fields:
-
 ```python
 name
 start_time
@@ -489,9 +509,7 @@ end_time
 grace_minutes
 ```
 
-## Employee Shift
-
-Fields:
+## EmployeeShift
 
 ```python
 employee
@@ -506,8 +524,6 @@ effective_from
 App: holidays
 
 ## Holiday
-
-Fields:
 
 ```python
 name
@@ -524,25 +540,20 @@ App: notifications
 
 ## Notification
 
-Fields:
-
 ```python
 recipient
 title
 message
 is_read
-created_at
 ```
-
-### Events
 
 Generate notifications for:
 
-* Leave approval
-* Leave rejection
-* Payroll generation
-* Attendance issues
-* Performance review
+* Leave Approval
+* Leave Rejection
+* Payroll Generated
+* Performance Review Assigned
+* Attendance Issues
 
 ---
 
@@ -550,44 +561,85 @@ Generate notifications for:
 
 App: reports
 
-Generate:
+Generate reports for:
 
-* Employee Reports
-* Attendance Reports
-* Leave Reports
-* Payroll Reports
-* Recruitment Reports
+* Employees
+* Attendance
+* Leaves
+* Payroll
+* Recruitment
 
-Support:
+Export formats:
 
-* PDF Export
-* Excel Export
-* CSV Export
+* CSV
+* Excel
+* PDF
 
 ---
 
-# Audit Log Module
+# Audit Logging
 
 App: auditlogs
 
 Track:
-
-* Create
-* Update
-* Delete
-* Login
-* Logout
-
-Fields:
 
 ```python
 user
 action
 model_name
 object_id
-timestamp
 ip_address
+timestamp
 ```
+
+Actions:
+
+```text
+Create
+Update
+Delete
+Login
+Logout
+```
+
+Use middleware and signals.
+
+---
+
+# Services Layer
+
+Business logic must NOT exist inside views.
+
+Structure:
+
+```text
+services/
+
+employee_service.py
+
+attendance_service.py
+
+leave_service.py
+
+payroll_service.py
+
+notification_service.py
+```
+
+Views should call services.
+
+---
+
+# Signals
+
+Implement Django signals for:
+
+* Employee Created
+* Leave Approved
+* Leave Rejected
+* Payroll Generated
+* Notification Creation
+* Audit Logging
 
 ---
 
@@ -599,105 +651,66 @@ Widgets:
 
 * Total Employees
 * Active Employees
-* Pending Leave Requests
+* Today's Attendance
+* Pending Leaves
 * Payroll Summary
-* Attendance Summary
-* Recruitment Pipeline
+* Open Positions
 
 ## Employee Dashboard
 
 Widgets:
 
-* Attendance Today
+* My Attendance
 * Leave Balance
 * Upcoming Holidays
-* Recent Notifications
+* Notifications
 * Payslips
 
 ---
 
-# Django Admin Requirements
+# Admin Configuration
 
-Every model must:
+For every model:
 
-* Have list_display
-* Have list_filter
-* Have search_fields
-* Have ordering
-* Have readonly fields where applicable
+```python
+list_display
+list_filter
+search_fields
+ordering
+readonly_fields
+```
 
-Create custom admin dashboards.
+Use optimized queryset loading.
 
 ---
 
-# Database Requirements
+# Database Standards
 
 Use PostgreSQL.
 
 Requirements:
 
 * Proper Foreign Keys
-* Indexes
 * Unique Constraints
-* Database Transactions
+* Indexes
+* Transactions
 * Query Optimization
+* Select Related
+* Prefetch Related
 
 ---
 
-# Security Requirements
+# Security
 
-Implement:
+Enable:
 
 * CSRF Protection
-* XSS Protection
-* SQL Injection Prevention
 * Session Security
-* Password Validation
+* XSS Protection
+* Secure Password Validation
+* Login Protection
 
-Never disable Django security features.
-
----
-
-# Coding Standards
-
-## Model Rules
-
-Every model should inherit:
-
-```python
-TimeStampedModel
-```
-
-Fields:
-
-```python
-created_at
-updated_at
-```
-
-## Service Layer
-
-Business logic must NOT be written inside views.
-
-Structure:
-
-```text
-services/
-    employee_service.py
-    payroll_service.py
-    attendance_service.py
-```
-
----
-
-# Signals
-
-Use Django Signals for:
-
-* Employee creation
-* Leave approval notifications
-* Payroll generation notifications
-* Audit logging
+Never disable Django security middleware.
 
 ---
 
@@ -725,61 +738,196 @@ Test:
 
 ---
 
-# Documentation
+# Health Check Endpoint
 
-Generate:
+Create:
 
-* ER Diagram
-* Database Schema Documentation
-* API Documentation (internal)
-* Deployment Guide
+```text
+/health/
+```
+
+Response:
+
+```json
+{
+  "status": "ok"
+}
+```
+
+Used by Render Health Check.
 
 ---
 
-# Deployment
+# Render Deployment
 
-Support:
+## Required Packages
 
-* Docker
-* Docker Compose
-* Nginx
-* Gunicorn
-* PostgreSQL
+```txt
+Django
+gunicorn
+whitenoise
+dj-database-url
+psycopg[binary]
+python-dotenv
+Pillow
+openpyxl
+reportlab
+```
 
-Environment variables:
+---
+
+## Static Files
+
+```python
+STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+```
+
+Use WhiteNoise.
+
+---
+
+## Database
+
+Use:
+
+```python
+dj_database_url
+```
+
+Production database must use:
+
+```python
+DATABASE_URL
+```
+
+Environment variable.
+
+---
+
+## Environment Variables
 
 ```env
 DEBUG=False
 
 SECRET_KEY=
 
-DATABASE_NAME=
-DATABASE_USER=
-DATABASE_PASSWORD=
-DATABASE_HOST=
-DATABASE_PORT=
+DATABASE_URL=
 
-ALLOWED_HOSTS=
+ALLOWED_HOSTS=.onrender.com
+
+CSRF_TRUSTED_ORIGINS=https://*.onrender.com
 ```
 
 ---
 
-# Deliverables
+## Build Command
 
-AI should generate:
+```bash
+pip install -r requirements.txt
 
-1. Complete Django Project Structure
-2. Models
-3. Forms
-4. Services
-5. Views
-6. URLs
-7. Templates
-8. Admin Configurations
+python manage.py collectstatic --noinput
+
+python manage.py migrate
+```
+
+---
+
+## Start Command
+
+```bash
+gunicorn config.wsgi:application
+```
+
+---
+
+## render.yaml
+
+```yaml
+services:
+  - type: web
+    name: hrms
+    runtime: python
+
+    buildCommand: |
+      pip install -r requirements.txt
+      python manage.py collectstatic --noinput
+      python manage.py migrate
+
+    startCommand: |
+      gunicorn config.wsgi:application
+
+    envVars:
+      - key: DEBUG
+        value: False
+```
+
+---
+
+# Development Roadmap
+
+Phase 1
+
+* Project Setup
+* Authentication
+* RBAC
+* Departments
+
+Phase 2
+
+* Employees
+* Attendance
+
+Phase 3
+
+* Leave Management
+
+Phase 4
+
+* Payroll
+
+Phase 5
+
+* Recruitment
+
+Phase 6
+
+* Performance
+
+Phase 7
+
+* Assets
+* Documents
+
+Phase 8
+
+* Reports
+* Audit Logs
+
+Phase 9
+
+* Deployment
+* Production Hardening
+
+---
+
+# Final Deliverables
+
+Generate:
+
+1. Complete Django Project
+2. PostgreSQL Integration
+3. Custom User Model
+4. All Modules
+5. Templates
+6. Forms
+7. Services Layer
+8. Signals
 9. Tests
-10. Docker Setup
-11. Deployment Files
-12. Seed Data Scripts
-13. Documentation
+10. Admin Configuration
+11. Render Deployment Files
+12. Documentation
+13. Seed Data
+14. Production Configuration
 
-The final system should be production-ready, modular, maintainable, secure, and scalable while using only Django Framework and PostgreSQL.
+The final system must be production-ready, maintainable, secure, scalable, and deployable directly to Render.

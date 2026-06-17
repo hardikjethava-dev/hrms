@@ -1,10 +1,10 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from .models import PayrollRecord
+from .models import Payroll
 from apps.notifications.models import Notification
 
 
-@receiver(post_save, sender=PayrollRecord)
+@receiver(post_save, sender=Payroll)
 def payroll_record_created_handler(sender, instance, created, **kwargs):
     if created:
         try:

@@ -1,5 +1,5 @@
 from django.db import models
-from apps.accounts.models import TimeStampedModel
+from apps.core.models import TimeStampedModel
 
 
 class Attendance(TimeStampedModel):
@@ -20,6 +20,7 @@ class Attendance(TimeStampedModel):
     check_in = models.TimeField(null=True, blank=True)
     check_out = models.TimeField(null=True, blank=True)
     working_hours = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    overtime_hours = models.DecimalField(max_digits=5, decimal_places=2, default=0.0, null=True, blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Absent')
     remarks = models.TextField(blank=True)
 

@@ -1,9 +1,9 @@
 from django.db import models
-from apps.accounts.models import TimeStampedModel
+from apps.core.models import TimeStampedModel
 
 
 class Department(TimeStampedModel):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, unique=True)
     code = models.CharField(max_length=20, unique=True)
     description = models.TextField(blank=True)
     head = models.ForeignKey(

@@ -1,20 +1,20 @@
 from decimal import Decimal
 from django.utils import timezone
-from apps.payroll.models import SalaryStructure, PayrollRecord
+from apps.payroll.models import SalaryStructure, Payroll
 from apps.leaves.models import LeaveRequest
 
 
 def calculate_monthly_payroll(employee, month, year):
     """
     Computes compensation figures, deducts any unpaid leave days,
-    and saves/updates the monthly PayrollRecord.
+    and saves/updates the monthly Payroll.
     """
     # 1. Fetch active salary structure
     structure = getattr(employee, 'salary_structure', None)
     if not structure:
         raise ValueError(f"Employee {employee} does not have an active Salary Structure defined.")
         
-    basic = Decimal(str(structure.basic_salary))
+    basic = Decimal(str(structure.base_salary))
     hra = Decimal(str(structure.hra))
     allowances = Decimal(str(structure.allowances))
     fixed_deductions = Decimal(str(structure.deductions))
@@ -23,7 +23,7 @@ def calculate_monthly_payroll(employee, month, year):
     # Count approved 'Unpaid Leave' days falling inside the target month & year
     unpaid_leaves = LeaveRequest.objects.filter(
         employee=employee,
-        leave_type='Unpaid Leave',
+        leave_type__name='Unpaid Leave',
         status='Approved',
         start_date__year=year,
         start_date__month=month
@@ -45,13 +45,13 @@ def calculate_monthly_payroll(employee, month, year):
     net_salary = max(Decimal(0.00), gross_salary - total_deductions)
     
     # 4. Save record
-    record, created = PayrollRecord.objects.update_or_create(
+    record, created = Payroll.objects.update_or_create(
         employee=employee,
         month=month,
         year=year,
         defaults={
             'gross_salary': round(gross_salary, 2),
-            'deduction_amount': round(total_deductions, 2),
+            'total_deductions': round(total_deductions, 2),
             'net_salary': round(net_salary, 2),
             'generated_at': timezone.now()
         }

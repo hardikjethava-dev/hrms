@@ -1,5 +1,5 @@
 from django.db import models
-from apps.accounts.models import TimeStampedModel
+from apps.core.models import TimeStampedModel
 
 
 class EmployeeDocument(TimeStampedModel):
@@ -7,8 +7,8 @@ class EmployeeDocument(TimeStampedModel):
         ('Resume', 'Resume'),
         ('Offer Letter', 'Offer Letter'),
         ('Contract', 'Contract'),
-        ('ID Proof', 'ID Proof'),
         ('Certificate', 'Certificate'),
+        ('Government ID', 'Government ID'),
         ('Other', 'Other'),
     )
 
@@ -19,7 +19,6 @@ class EmployeeDocument(TimeStampedModel):
     )
     document_type = models.CharField(max_length=50, choices=DOCUMENT_TYPE_CHOICES)
     file = models.FileField(upload_to='employee_docs/')
-    uploaded_at = models.DateTimeField(auto_now_add=True)
     expiry_date = models.DateField(null=True, blank=True)
 
     def __str__(self):

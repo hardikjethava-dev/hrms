@@ -53,6 +53,7 @@
                         <th>Clock In</th>
                         <th>Clock Out</th>
                         <th>Worked Hours</th>
+                        <th>Overtime Hours</th>
                         <th>Status</th>
                         <th>Remarks</th>
                     </tr>
@@ -70,6 +71,7 @@
                             <td>{{ record.check_in|default:"-" }}</td>
                             <td>{{ record.check_out|default:"-" }}</td>
                             <td>{{ record.working_hours|default:"-" }}</td>
+                            <td>{{ record.overtime_hours|default:"0.00" }}</td>
                             <td>
                                 <span class="badge {% if record.status == 'Present' %}badge-success{% elif record.status == 'Absent' %}badge-danger{% elif record.status == 'Half Day' or record.status == 'Leave' %}badge-warning{% else %}badge-info{% endif %}">
                                     {{ record.status }}
@@ -79,7 +81,7 @@
                         </tr>
                     {% empty %}
                         <tr>
-                            <td colspan="{% if is_manager %}7{% else %}6{% endif %}" style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+                            <td colspan="{% if is_manager %}8{% else %}7{% endif %}" style="text-align: center; padding: 2rem; color: var(--text-secondary);">
                                 No attendance records found.
                             </td>
                         </tr>

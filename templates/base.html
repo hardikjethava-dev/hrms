@@ -184,6 +184,18 @@
 
                 {% block content %}{% endblock %}
             </div>
+
+            {% if user.is_authenticated %}
+            <!-- Footer -->
+            <footer class="app-footer">
+                <div class="footer-copyright">
+                    &copy; {% now "Y" %} <span>HRMS Core</span>. All rights reserved.
+                </div>
+                <div class="footer-author">
+                    Developed by <a href="https://github.com/hardikjethava-dev" target="_blank" rel="noopener noreferrer">Hardik Jethava</a>
+                </div>
+            </footer>
+            {% endif %}
         </main>
     </div>
 

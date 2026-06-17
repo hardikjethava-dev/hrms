@@ -45,13 +45,13 @@ def register_audit_signals():
     from apps.employees.models import Employee
     from apps.departments.models import Department
     from apps.leaves.models import LeaveRequest
-    from apps.payroll.models import PayrollRecord, SalaryStructure
+    from apps.payroll.models import Payroll, SalaryStructure
     from apps.assets.models import Asset
     from apps.documents.models import EmployeeDocument
     from apps.attendance.models import Attendance
     
     User = get_user_model()
-    tracked_models = [User, Employee, Department, LeaveRequest, PayrollRecord, SalaryStructure, Asset, EmployeeDocument, Attendance]
+    tracked_models = [User, Employee, Department, LeaveRequest, Payroll, SalaryStructure, Asset, EmployeeDocument, Attendance]
 
     for model in tracked_models:
         post_save.connect(make_save_handler(model), sender=model, dispatch_uid=f"audit_save_{model.__name__}")

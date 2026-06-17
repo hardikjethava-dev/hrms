@@ -21,9 +21,10 @@ def create_employee(user_email, password, role, employee_data):
     
     # 2. Create the Employee profile
     employee_data.pop('email', None)
+    personal_email = employee_data.pop('personal_email', user_email)
     employee = Employee.objects.create(
         user=user,
-        email=user_email,
+        personal_email=personal_email,
         **employee_data
     )
     
@@ -31,13 +32,16 @@ def create_employee(user_email, password, role, employee_data):
     leave_types = ['Annual Leave', 'Sick Leave', 'Casual Leave', 'Maternity Leave', 'Paternity Leave', 'Unpaid Leave']
     for lt in leave_types:
         try:
-            # Check if LeaveBalance is imported
-            from apps.leaves.models import LeaveBalance
+            from apps.leaves.models import LeaveBalance, LeaveType
             # Determine appropriate base days
             allowed = 15 if 'Sick' in lt or 'Casual' in lt else (20 if 'Annual' in lt else 0)
+            leave_type_obj, _ = LeaveType.objects.get_or_create(
+                name=lt,
+                defaults={'days_per_year': allowed, 'is_paid': lt != 'Unpaid Leave'}
+            )
             LeaveBalance.objects.get_or_create(
                 employee=employee,
-                leave_type=lt,
+                leave_type=leave_type_obj,
                 defaults={'allowed_days': allowed, 'remaining_days': allowed}
             )
         except Exception:
@@ -58,9 +62,10 @@ def update_employee(employee, user_email, role, employee_data):
     user.save()
     
     employee_data.pop('email', None)
+    personal_email = employee_data.pop('personal_email', user_email)
     for key, value in employee_data.items():
         setattr(employee, key, value)
-    employee.email = user_email
+    employee.personal_email = personal_email
     employee.save()
     return employee
 

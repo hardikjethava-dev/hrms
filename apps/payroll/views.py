@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import HttpResponseForbidden
 from django.utils import timezone
-from .models import PayrollRecord, SalaryStructure
+from .models import Payroll, SalaryStructure
 from .forms import SalaryStructureForm
 from services import payroll_service
 from apps.employees.models import Employee
@@ -19,21 +19,21 @@ def payroll_list(request):
     is_mgr = is_hr_or_admin(user)
     
     if is_mgr:
-        records = PayrollRecord.objects.all().select_related('employee', 'employee__department').order_by('-year', '-month')
+        records = Payroll.objects.all().select_related('employee', 'employee__department').order_by('-year', '-month')
         structures = SalaryStructure.objects.all().select_related('employee')
     else:
         employee = getattr(user, 'employee_profile', None)
         if employee:
-            records = PayrollRecord.objects.filter(employee=employee).order_by('-year', '-month')
+            records = Payroll.objects.filter(employee=employee).order_by('-year', '-month')
         else:
-            records = PayrollRecord.objects.none()
+            records = Payroll.objects.none()
         structures = []
 
     return render(request, 'payroll/payroll_list.html', {
         'records': records,
         'structures': structures,
         'is_manager': is_mgr,
-        'months': PayrollRecord.MONTH_CHOICES,
+        'months': Payroll.MONTH_CHOICES,
         'current_year': timezone.localdate().year
     })
 

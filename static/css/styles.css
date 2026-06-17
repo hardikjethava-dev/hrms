@@ -506,3 +506,40 @@ a:hover {
     }
     .col-6 { grid-column: span 12; }
 }
+
+/* Footer Styles */
+.app-footer {
+    padding: 1rem 2rem;
+    background-color: var(--bg-secondary);
+    border-top: 1px solid var(--border-glass);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.app-footer .footer-copyright span {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.app-footer .footer-author a {
+    color: var(--primary);
+    font-weight: 500;
+    transition: var(--transition-all);
+}
+
+.app-footer .footer-author a:hover {
+    color: var(--primary-hover);
+    text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+    .app-footer {
+        flex-direction: column;
+        gap: 0.5rem;
+        text-align: center;
+        padding: 1rem;
+    }
+}

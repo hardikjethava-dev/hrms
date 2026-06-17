@@ -3,8 +3,8 @@ from .models import Attendance
 
 @admin.register(Attendance)
 class AttendanceAdmin(admin.ModelAdmin):
-    list_display = ('employee', 'date', 'check_in', 'check_out', 'working_hours', 'status')
+    list_display = ('employee', 'date', 'check_in', 'check_out', 'working_hours', 'overtime_hours', 'status')
     list_filter = ('status', 'date')
     search_fields = ('employee__first_name', 'employee__last_name', 'employee__employee_id')
-    ordering = ('-date',)
+    ordering = ('-date', 'employee')
     readonly_fields = ('created_at', 'updated_at')

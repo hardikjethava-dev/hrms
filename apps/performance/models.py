@@ -1,14 +1,14 @@
 from django.db import models
-from apps.accounts.models import TimeStampedModel
+from apps.core.models import TimeStampedModel
 
 
-class PerformanceReview(TimeStampedModel):
+class Review(TimeStampedModel):
     RATING_CHOICES = (
-        (1, '1 - Poor'),
-        (2, '2 - Fair'),
-        (3, '3 - Good'),
-        (4, '4 - Very Good'),
-        (5, '5 - Excellent'),
+        (1, 'Poor'),
+        (2, 'Fair'),
+        (3, 'Good'),
+        (4, 'Very Good'),
+        (5, 'Excellent'),
     )
 
     employee = models.ForeignKey(
@@ -23,8 +23,7 @@ class PerformanceReview(TimeStampedModel):
     )
     review_period = models.CharField(max_length=50, help_text="e.g. Q1 2026, Annual 2025")
     rating = models.IntegerField(choices=RATING_CHOICES)
-    comments = models.TextField()
-    goals = models.TextField(help_text="Goals/OKRs set for the next period")
+    feedback = models.TextField()
     review_date = models.DateField()
 
     def __str__(self):

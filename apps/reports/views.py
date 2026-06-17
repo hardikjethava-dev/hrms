@@ -15,7 +15,7 @@ from reportlab.lib import colors
 from apps.employees.models import Employee
 from apps.attendance.models import Attendance
 from apps.leaves.models import LeaveRequest
-from apps.payroll.models import PayrollRecord
+from apps.payroll.models import Payroll
 from apps.recruitment.models import Candidate
 
 
@@ -29,14 +29,14 @@ def report_dashboard(request):
         return HttpResponseForbidden("Not authorized.")
         
     return render(request, 'reports/report_dashboard.html', {
-        'months': PayrollRecord.MONTH_CHOICES,
+        'months': Payroll.MONTH_CHOICES,
         'current_year': timezone.localdate().year
     })
 
 
 @login_required
 def report_payslip(request, pk):
-    record = get_object_or_404(PayrollRecord, pk=pk)
+    record = get_object_or_404(Payroll, pk=pk)
     
     # Check authorization (Employees can only download their own payslips)
     if request.user.role == 'Employee':
@@ -100,7 +100,7 @@ def report_payslip(request, pk):
     
     # Salary details
     sal_structure = getattr(record.employee, 'salary_structure', None)
-    basic = sal_structure.basic_salary if sal_structure else 0
+    basic = sal_structure.base_salary if sal_structure else 0
     hra = sal_structure.hra if sal_structure else 0
     allowances = sal_structure.allowances if sal_structure else 0
     fixed_deductions = sal_structure.deductions if sal_structure else 0
@@ -108,14 +108,14 @@ def report_payslip(request, pk):
     sal_data = [
         [Paragraph("Earnings", label_style), Paragraph("Amount ($)", label_style),
          Paragraph("Deductions", label_style), Paragraph("Amount ($)", label_style)],
-        [Paragraph("Basic Salary", val_style), Paragraph(f"{basic:.2f}", val_style),
+        [Paragraph("Base Salary", val_style), Paragraph(f"{basic:.2f}", val_style),
          Paragraph("Fixed Deductions", val_style), Paragraph(f"{fixed_deductions:.2f}", val_style)],
         [Paragraph("HRA", val_style), Paragraph(f"{hra:.2f}", val_style),
-         Paragraph("Unpaid Leave Deductions", val_style), Paragraph(f"{(record.deduction_amount - fixed_deductions):.2f}", val_style)],
+         Paragraph("Unpaid Leave Deductions", val_style), Paragraph(f"{(record.total_deductions - fixed_deductions):.2f}", val_style)],
         [Paragraph("Allowances", val_style), Paragraph(f"{allowances:.2f}", val_style),
          Paragraph("", val_style), Paragraph("", val_style)],
         [Paragraph("Gross Earnings", label_style), Paragraph(f"{record.gross_salary:.2f}", label_style),
-         Paragraph("Total Deductions", label_style), Paragraph(f"{record.deduction_amount:.2f}", label_style)]
+         Paragraph("Total Deductions", label_style), Paragraph(f"{record.total_deductions:.2f}", label_style)]
     ]
     
     t_sal = Table(sal_data, colWidths=[130, 130, 130, 130])
@@ -170,7 +170,7 @@ def export_report(request):
         headers = ['Employee ID', 'Name', 'Email', 'Phone', 'Role', 'Status', 'Department']
         data = Employee.objects.all().select_related('user', 'department')
         for emp in data:
-            rows.append([emp.employee_id, f"{emp.first_name} {emp.last_name}", emp.email, emp.phone, emp.user.role, emp.employment_status, emp.department.name if emp.department else "-"])
+            rows.append([emp.employee_id, f"{emp.first_name} {emp.last_name}", emp.personal_email or emp.user.email, emp.phone, emp.user.role, emp.employment_status, emp.department.name if emp.department else "-"])
             
     elif report_type == 'attendance':
         headers = ['Employee ID', 'Name', 'Date', 'Clock In', 'Clock Out', 'Status', 'Remarks']
@@ -186,15 +186,15 @@ def export_report(request):
             
     elif report_type == 'payroll':
         headers = ['Employee ID', 'Name', 'Period', 'Gross Salary', 'Deductions', 'Net Salary']
-        data = PayrollRecord.objects.all().select_related('employee')
+        data = Payroll.objects.all().select_related('employee')
         for pay in data:
-            rows.append([pay.employee.employee_id, f"{pay.employee.first_name} {pay.employee.last_name}", f"{pay.get_month_display()} {pay.year}", pay.gross_salary, pay.deduction_amount, pay.net_salary])
+            rows.append([pay.employee.employee_id, f"{pay.employee.first_name} {pay.employee.last_name}", f"{pay.get_month_display()} {pay.year}", pay.gross_salary, pay.total_deductions, pay.net_salary])
             
     elif report_type == 'recruitment':
         headers = ['Candidate', 'Email', 'Role Applied', 'Experience', 'Status']
-        data = Candidate.objects.all().select_related('job_position')
+        data = Candidate.objects.all().select_related('job_opening')
         for cand in data:
-            rows.append([f"{cand.first_name} {cand.last_name}", cand.email, cand.job_position.title if cand.job_position else "General", cand.experience, cand.status])
+            rows.append([f"{cand.first_name} {cand.last_name}", cand.email, cand.job_opening.title if cand.job_opening else "General", cand.experience, cand.status])
             
     else:
         return redirect('report_dashboard')

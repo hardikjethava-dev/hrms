@@ -1,8 +1,8 @@
 from django.db import models
-from apps.accounts.models import TimeStampedModel
+from apps.core.models import TimeStampedModel
 
 
-class JobPosition(TimeStampedModel):
+class JobOpening(TimeStampedModel):
     STATUS_CHOICES = (
         ('Draft', 'Draft'),
         ('Open', 'Open'),
@@ -13,10 +13,11 @@ class JobPosition(TimeStampedModel):
     department = models.ForeignKey(
         'departments.Department',
         on_delete=models.CASCADE,
-        related_name='job_positions'
+        related_name='job_openings'
     )
     description = models.TextField()
-    vacancies = models.IntegerField(default=1)
+    requirements = models.TextField(blank=True)
+    experience_years = models.IntegerField(default=0)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Draft')
 
     def __str__(self):
@@ -33,8 +34,8 @@ class Candidate(TimeStampedModel):
         ('Hired', 'Hired'),
     )
 
-    job_position = models.ForeignKey(
-        JobPosition,
+    job_opening = models.ForeignKey(
+        JobOpening,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
@@ -49,4 +50,4 @@ class Candidate(TimeStampedModel):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Applied')
 
     def __str__(self):
-        return f"{self.first_name} {self.last_name} - {self.job_position.title if self.job_position else 'General'}"
+        return f"{self.first_name} {self.last_name} - {self.job_opening.title if self.job_opening else 'General'}"

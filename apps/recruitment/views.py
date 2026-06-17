@@ -2,8 +2,8 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import HttpResponseForbidden
-from .models import JobPosition, Candidate
-from .forms import JobPositionForm, CandidateForm
+from .models import JobOpening, Candidate
+from .forms import JobOpeningForm, CandidateForm
 
 
 def is_hr_or_admin(user):
@@ -15,8 +15,8 @@ def recruitment_list(request):
     if not is_hr_or_admin(request.user):
         return HttpResponseForbidden("Not authorized.")
         
-    jobs = JobPosition.objects.all().select_related('department')
-    candidates = Candidate.objects.all().select_related('job_position')
+    jobs = JobOpening.objects.all().select_related('department')
+    candidates = Candidate.objects.all().select_related('job_opening')
     
     return render(request, 'recruitment/recruitment_list.html', {
         'jobs': jobs,
@@ -30,14 +30,14 @@ def job_create(request):
         return HttpResponseForbidden("Not authorized.")
         
     if request.method == 'POST':
-        form = JobPositionForm(request.POST)
+        form = JobOpeningForm(request.POST)
         if form.is_valid():
             form.save()
-            messages.success(request, "Job position posted successfully!")
+            messages.success(request, "Job opening posted successfully!")
             return redirect('recruitment_list')
     else:
-        form = JobPositionForm()
-    return render(request, 'recruitment/job_form.html', {'form': form, 'title': 'Create Job Position'})
+        form = JobOpeningForm()
+    return render(request, 'recruitment/job_form.html', {'form': form, 'title': 'Create Job Opening'})
 
 
 @login_required

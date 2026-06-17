@@ -1,5 +1,5 @@
 from django.db import models
-from apps.accounts.models import TimeStampedModel
+from apps.core.models import TimeStampedModel
 
 
 class SalaryStructure(TimeStampedModel):
@@ -8,7 +8,7 @@ class SalaryStructure(TimeStampedModel):
         on_delete=models.CASCADE,
         related_name='salary_structure'
     )
-    basic_salary = models.DecimalField(max_digits=12, decimal_places=2)
+    base_salary = models.DecimalField(max_digits=12, decimal_places=2)
     hra = models.DecimalField(max_digits=12, decimal_places=2, verbose_name="House Rent Allowance")
     allowances = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
     deductions = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
@@ -18,7 +18,7 @@ class SalaryStructure(TimeStampedModel):
         return f"Salary structure for {self.employee}"
 
 
-class PayrollRecord(TimeStampedModel):
+class Payroll(TimeStampedModel):
     MONTH_CHOICES = (
         (1, 'January'), (2, 'February'), (3, 'March'), (4, 'April'),
         (5, 'May'), (6, 'June'), (7, 'July'), (8, 'August'),
@@ -33,7 +33,7 @@ class PayrollRecord(TimeStampedModel):
     month = models.IntegerField(choices=MONTH_CHOICES)
     year = models.IntegerField()
     gross_salary = models.DecimalField(max_digits=12, decimal_places=2)
-    deduction_amount = models.DecimalField(max_digits=12, decimal_places=2)
+    total_deductions = models.DecimalField(max_digits=12, decimal_places=2)
     net_salary = models.DecimalField(max_digits=12, decimal_places=2)
     generated_at = models.DateTimeField(auto_now_add=True)
 

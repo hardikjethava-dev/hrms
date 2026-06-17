@@ -6,8 +6,8 @@ from apps.employees.models import Employee
 from apps.departments.models import Department
 from apps.shifts.models import Shift, EmployeeShift
 from apps.attendance.models import Attendance
-from apps.leaves.models import LeaveRequest, LeaveBalance
-from apps.payroll.models import SalaryStructure, PayrollRecord
+from apps.leaves.models import LeaveRequest, LeaveBalance, LeaveType
+from apps.payroll.models import SalaryStructure, Payroll
 from services.employee_service import create_employee
 from services.attendance_service import record_check_in, record_check_out
 from services.payroll_service import calculate_monthly_payroll
@@ -51,7 +51,7 @@ class HRMSTestCase(TestCase):
         # Verify LeaveBalance auto-initialization
         balances = LeaveBalance.objects.filter(employee=emp)
         self.assertTrue(balances.exists())
-        self.assertEqual(balances.filter(leave_type='Sick Leave').first().remaining_days, 15)
+        self.assertEqual(balances.filter(leave_type__name='Sick Leave').first().remaining_days, 15)
 
     @patch('django.utils.timezone.localdate')
     @patch('django.utils.timezone.localtime')
@@ -98,7 +98,7 @@ class HRMSTestCase(TestCase):
         # Apply leave request
         leave = LeaveRequest.objects.create(
             employee=emp,
-            leave_type='Sick Leave',
+            leave_type=LeaveType.objects.get(name='Sick Leave'),
             start_date=date(2026, 6, 1),
             end_date=date(2026, 6, 3), # 3 days requested
             reason='Medical emergency',
@@ -106,7 +106,7 @@ class HRMSTestCase(TestCase):
         )
         
         # Verify initial balance
-        bal = LeaveBalance.objects.get(employee=emp, leave_type='Sick Leave')
+        bal = LeaveBalance.objects.get(employee=emp, leave_type__name='Sick Leave')
         self.assertEqual(bal.remaining_days, 15)
         
         # Approve leave manually or via custom trigger simulation
@@ -135,7 +135,7 @@ class HRMSTestCase(TestCase):
         
         SalaryStructure.objects.create(
             employee=emp,
-            basic_salary=3000.00,
+            base_salary=3000.00,
             hra=1000.00,
             allowances=200.00,
             deductions=100.00,
@@ -145,5 +145,5 @@ class HRMSTestCase(TestCase):
         # Calculate monthly payroll
         record = calculate_monthly_payroll(emp, 6, 2026)
         self.assertEqual(record.gross_salary, 4200.00)
-        self.assertEqual(record.deduction_amount, 100.00)
+        self.assertEqual(record.total_deductions, 100.00)
         self.assertEqual(record.net_salary, 4100.00)

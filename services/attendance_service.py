@@ -82,7 +82,7 @@ def record_check_in(employee):
 
 def record_check_out(employee):
     """
-    Records clock-out for today, calculates working hours and final status.
+    Records clock-out for today, calculates working hours, overtime, and final status.
     """
     today = timezone.localdate()
     now_time = timezone.localtime().time()
@@ -99,6 +99,12 @@ def record_check_out(employee):
     # Calculate decimal hours
     hours = get_decimal_hours(attendance.check_in, now_time)
     attendance.working_hours = hours
+    
+    # Calculate overtime hours (hours worked past 8 hours standard)
+    if hours > 8.0:
+        attendance.overtime_hours = round(hours - 8.0, 2)
+    else:
+        attendance.overtime_hours = 0.0
     
     # Status rules based on hours worked
     remarks = attendance.remarks

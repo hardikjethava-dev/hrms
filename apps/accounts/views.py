@@ -91,7 +91,7 @@ def admin_dashboard(request):
     # Local imports to avoid circular reference
     from apps.employees.models import Employee
     from apps.leaves.models import LeaveRequest
-    from apps.payroll.models import PayrollRecord
+    from apps.payroll.models import Payroll
     from apps.attendance.models import Attendance
     from apps.recruitment.models import Candidate
 
@@ -103,7 +103,7 @@ def admin_dashboard(request):
     
     # Payroll summary for current month
     payroll_sum = 0
-    recent_payroll = PayrollRecord.objects.filter(month=today.month, year=today.year)
+    recent_payroll = Payroll.objects.filter(month=today.month, year=today.year)
     for p in recent_payroll:
         payroll_sum += p.net_salary
 
@@ -136,7 +136,7 @@ def employee_dashboard(request):
     from apps.leaves.models import LeaveBalance, LeaveRequest
     from apps.holidays.models import Holiday
     from apps.notifications.models import Notification
-    from apps.payroll.models import PayrollRecord
+    from apps.payroll.models import Payroll
     from apps.attendance.models import Attendance
 
     user = request.user
@@ -155,7 +155,7 @@ def employee_dashboard(request):
     if employee:
         attendance_today = Attendance.objects.filter(employee=employee, date=today).first()
         leave_balances = LeaveBalance.objects.filter(employee=employee)
-        payslips = PayrollRecord.objects.filter(employee=employee).order_by('-year', '-month')[:6]
+        payslips = Payroll.objects.filter(employee=employee).order_by('-year', '-month')[:6]
 
     recent_notifications = Notification.objects.filter(recipient=user).order_by('-created_at')[:5]
 

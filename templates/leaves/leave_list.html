@@ -21,7 +21,7 @@
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1.5rem;">
             {% for balance in balances %}
                 <div class="card" style="padding: 1.25rem; text-align: center;">
-                    <span style="font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em;">{{ balance.leave_type }}</span>
+                    <span style="font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em;">{{ balance.leave_type.name }}</span>
                     <div style="font-size: 2.25rem; font-weight: 800; color: var(--primary); margin: 0.5rem 0;">
                         {{ balance.remaining_days }}
                     </div>
@@ -60,7 +60,7 @@
                                     <div style="font-size: 0.75rem; color: var(--text-secondary);">{{ leave.employee.employee_id }}</div>
                                 </td>
                             {% endif %}
-                            <td>{{ leave.leave_type }}</td>
+                            <td>{{ leave.leave_type.name }}</td>
                             <td>{{ leave.start_date }}</td>
                             <td>{{ leave.end_date }}</td>
                             <td>
@@ -122,7 +122,7 @@
                                     <div style="font-size: 0.75rem; color: var(--text-secondary);">{{ leave.employee.employee_id }}</div>
                                 </td>
                             {% endif %}
-                            <td>{{ leave.leave_type }}</td>
+                            <td>{{ leave.leave_type.name }}</td>
                             <td>{{ leave.start_date }}</td>
                             <td>{{ leave.end_date }}</td>
                             <td>

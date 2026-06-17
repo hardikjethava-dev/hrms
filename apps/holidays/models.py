@@ -1,5 +1,5 @@
 from django.db import models
-from apps.accounts.models import TimeStampedModel
+from apps.core.models import TimeStampedModel
 
 
 class Holiday(TimeStampedModel):

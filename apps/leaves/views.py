@@ -51,12 +51,13 @@ def leave_apply(request):
     if request.method == 'POST':
         form = LeaveRequestForm(request.POST)
         if form.is_valid():
-            leave = form.save(commit=False)
-            leave.employee = employee
-            leave.status = 'Pending'
-            leave.save()
-            messages.success(request, "Leave request submitted successfully!")
-            return redirect('leave_list')
+            try:
+                from services import leave_service
+                leave_service.apply_leave(employee, form.cleaned_data)
+                messages.success(request, "Leave request submitted successfully!")
+                return redirect('leave_list')
+            except Exception as e:
+                messages.error(request, f"Error: {str(e)}")
     else:
         form = LeaveRequestForm()
     return render(request, 'leaves/leave_form.html', {'form': form, 'title': 'Apply for Leave'})
@@ -70,28 +71,13 @@ def leave_approve(request, pk):
     manager_employee = getattr(request.user, 'employee_profile', None)
     leave = get_object_or_404(LeaveRequest, pk=pk)
     
-    if leave.status != 'Pending':
-        messages.error(request, "Leave request is already processed.")
-        return redirect('leave_list')
-
-    # Calculate requested days
-    requested_days = (leave.end_date - leave.start_date).days + 1
-    
-    # Deduct from Leave Balance
-    balance = LeaveBalance.objects.filter(employee=leave.employee, leave_type=leave.leave_type).first()
-    if balance:
-        if balance.remaining_days < requested_days and leave.leave_type != 'Unpaid Leave':
-            messages.warning(request, f"Employee has only {balance.remaining_days} remaining days. Approving anyway.")
+    try:
+        from services import leave_service
+        leave_service.approve_leave(leave, manager_employee)
+        messages.success(request, f"Leave request for {leave.employee} approved successfully.")
+    except Exception as e:
+        messages.error(request, f"Error: {str(e)}")
         
-        balance.remaining_days = max(0, balance.remaining_days - requested_days)
-        balance.save()
-
-    leave.status = 'Approved'
-    leave.approved_by = manager_employee
-    leave.approved_at = timezone.now()
-    leave.save()
-    
-    messages.success(request, f"Leave request for {leave.employee} approved successfully.")
     return redirect('leave_list')
 
 
@@ -103,16 +89,13 @@ def leave_reject(request, pk):
     manager_employee = getattr(request.user, 'employee_profile', None)
     leave = get_object_or_404(LeaveRequest, pk=pk)
     
-    if leave.status != 'Pending':
-        messages.error(request, "Leave request is already processed.")
-        return redirect('leave_list')
-
-    leave.status = 'Rejected'
-    leave.approved_by = manager_employee
-    leave.approved_at = timezone.now()
-    leave.save()
-    
-    messages.warning(request, f"Leave request for {leave.employee} rejected.")
+    try:
+        from services import leave_service
+        leave_service.reject_leave(leave, manager_employee)
+        messages.warning(request, f"Leave request for {leave.employee} rejected.")
+    except Exception as e:
+        messages.error(request, f"Error: {str(e)}")
+        
     return redirect('leave_list')
 
 
@@ -120,16 +103,11 @@ def leave_reject(request, pk):
 def leave_cancel(request, pk):
     leave = get_object_or_404(LeaveRequest, pk=pk)
     
-    # Verify owner
-    if leave.employee.user != request.user:
-        return HttpResponseForbidden("Not authorized to cancel this request.")
-
-    if leave.status != 'Pending':
-        messages.error(request, "Cannot cancel a processed leave request.")
-        return redirect('leave_list')
-
-    leave.status = 'Cancelled'
-    leave.save()
-    
-    messages.info(request, "Leave request has been cancelled.")
+    try:
+        from services import leave_service
+        leave_service.cancel_leave(leave, request.user)
+        messages.info(request, "Leave request has been cancelled.")
+    except Exception as e:
+        messages.error(request, f"Error: {str(e)}")
+        
     return redirect('leave_list')

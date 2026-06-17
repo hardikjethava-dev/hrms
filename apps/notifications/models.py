@@ -1,6 +1,6 @@
 from django.db import models
 from django.conf import settings
-from apps.accounts.models import TimeStampedModel
+from apps.core.models import TimeStampedModel
 
 
 class Notification(TimeStampedModel):
